@@ -9,6 +9,11 @@ export default registerAs('typeorm', () => ({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'postgres',
   ssl: process.env.DB_SSL === 'true',
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
   entities: [join(__dirname, '/../**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '/../migration/**/*{.ts,.js}')],
   migrationsTableName: 'migration',
