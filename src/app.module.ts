@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
-import typeormConfig from './config/db.config';
+import typeormConfig from './config/typeorm.config';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import typeormConfig from './config/db.config';
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        ...configService.get('db'),
+        ...configService.get('typeorm'),
         autoLoadEntities: true,
         synchronize: true,
       }),
