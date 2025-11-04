@@ -11,4 +11,4 @@ COPY --from=builder /cse4205-api/dist ./dist
 COPY package*.json ./
 RUN npm install --only=production
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
