@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { join } from 'path';
 
 export default registerAs('typeorm', () => ({
@@ -17,6 +18,7 @@ export default registerAs('typeorm', () => ({
   entities: [join(__dirname, '/../**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '/../migration/**/*{.ts,.js}')],
   migrationsTableName: 'migration',
+  namingStrategy: new SnakeNamingStrategy(),
   synchronize: false,
   migrationsRun: true,
 }));
