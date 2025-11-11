@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { join } from 'path';
+import { readFileSync } from 'fs';
 
 export default registerAs('typeorm', () => ({
   type: process.env.DB_TYPE || 'postgres',
@@ -9,12 +10,13 @@ export default registerAs('typeorm', () => ({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'postgres',
-  ssl: process.env.DB_SSL === 'true',
-  extra: {
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  },
+  ssl: process.env.DB_SSL_CERT_PATH
+    ? {
+        ca: readFileSync(
+          join(__dirname, '/../', process.env.DB_SSL_CERT_PATH),
+        ).toString(),
+      }
+    : false,
   entities: [join(__dirname, '/../**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '/../migration/**/*{.ts,.js}')],
   migrationsTableName: 'migration',
