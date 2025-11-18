@@ -1,0 +1,48 @@
+name: Deploy API Server
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: |
+          docker build -t api-server .
+          docker tag api-server:latest ${{ secrets.ECR_URI }}:latest
+
+      - name: Push Docker image to ECR
+        run: docker push ${{ secrets.ECR_URI }}:latest
+
+      - name: Deploy to EC2 via SSM
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "docker stop api-server || true",
+              "docker rm api-server || true",
+              "docker pull '${{ secrets.ECR_URI }}':latest",
+              "docker run -d --name api-server -p 3000:3000 '${{ secrets.ECR_URI }}':latest"
+            ]' \
+            --comment "Deploy API Server" \
+            --output json
