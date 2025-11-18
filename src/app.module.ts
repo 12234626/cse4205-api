@@ -14,8 +14,8 @@ import { AppService } from './app.service';
       load: [appConfig, typeormConfig],
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        ...configService.get('typeorm'),
+      useFactory: async (configService: ConfigService) => ({
+        ...(await configService.get('typeorm')),
         autoLoadEntities: true,
       }),
       inject: [ConfigService],
