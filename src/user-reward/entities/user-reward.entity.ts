@@ -1,38 +1,38 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { IsString } from 'class-validator';
+import { IsInt } from 'class-validator';
 
-import type { UserEntity } from 'src/user/entities/user.entity';
-import type { RewardEntity } from 'src/reward/entities/reward.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { RewardEntity } from 'src/reward/entities/reward.entity';
 
 @Entity('user_reward')
 export class UserRewardEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
-  @IsString()
-  userRewardId: string;
+  @PrimaryGeneratedColumn()
+  @IsInt()
+  userRewardId: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  @IsString()
-  userId: string;
+  @Column({ type: 'int' })
+  @IsInt()
+  userId: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  @IsString()
-  rewardId: string;
+  @Column({ type: 'int' })
+  @IsInt()
+  rewardId: number;
 
   @CreateDateColumn({ type: 'timestamp' })
-  awardedAt: Date;
+  createdAt: Date;
 
-  @ManyToOne('UserEntity', (user: UserEntity) => user.userRewards)
+  @ManyToOne(() => UserEntity, (user: UserEntity) => user.userRewards)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ManyToOne('RewardEntity', (reward: RewardEntity) => reward.userRewards)
+  @ManyToOne(() => RewardEntity, (reward: RewardEntity) => reward.userRewards)
   @JoinColumn({ name: 'reward_id' })
   reward: RewardEntity;
 }

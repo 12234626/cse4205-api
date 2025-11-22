@@ -1,26 +1,14 @@
-import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { IsString, IsEnum, IsInt, Min } from 'class-validator';
 
-import type { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
-
-export enum QuestType {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  EVENT = 'event',
-  NORMAL = 'normal',
-}
-
-export enum Difficulty {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard',
-}
+import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
+import { QuestType, Difficulty } from 'src/quest/types/quest.type';
 
 @Entity('quest')
 export class QuestEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
-  @IsString()
-  questId: string;
+  @PrimaryGeneratedColumn()
+  @IsInt()
+  questId: number;
 
   @Column({ type: 'varchar', length: 200 })
   @IsString()
@@ -52,6 +40,9 @@ export class QuestEntity {
   @IsEnum(Difficulty)
   difficulty: Difficulty;
 
-  @OneToMany('UserQuestEntity', (userQuest: UserQuestEntity) => userQuest.quest)
+  @OneToMany(
+    () => UserQuestEntity,
+    (userQuest: UserQuestEntity) => userQuest.quest,
+  )
   userQuests: UserQuestEntity[];
 }

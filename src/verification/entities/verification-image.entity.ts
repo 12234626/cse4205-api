@@ -1,22 +1,21 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { IsString, IsUrl } from 'class-validator';
+import { IsInt, IsString, IsUrl } from 'class-validator';
 
 import type { VerificationEntity } from 'src/verification/entities/verification.entity';
 
-@Entity('user_quest_image')
-export class UserQuestImageEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
-  @IsString()
-  imageId: string;
+@Entity('verification_image')
+export class VerificationImageEntity {
+  @PrimaryGeneratedColumn()
+  @IsInt()
+  imageId: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'int' })
   @IsString()
   verificationId: string;
 
@@ -25,12 +24,11 @@ export class UserQuestImageEntity {
   imageUrl: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  uploadedAt: Date;
+  createdAt: Date;
 
   @ManyToOne(
     'VerificationEntity',
-    (verification: VerificationEntity) => verification.images,
+    (verification: VerificationEntity) => verification.verificationImages,
   )
-  @JoinColumn({ name: 'verification_id' })
   verification: VerificationEntity;
 }

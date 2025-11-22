@@ -1,20 +1,14 @@
-import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { IsString, IsEnum, IsUrl } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { IsString, IsInt, IsEnum, IsUrl } from 'class-validator';
 
-import type { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
-
-export enum RewardType {
-  BADGE = 'badge',
-  TITLE = 'title',
-  ACHIEVEMENT = 'achievement',
-  SEASON = 'season',
-}
+import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
+import { RewardType } from 'src/reward/types/reward.type';
 
 @Entity('reward')
 export class RewardEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
-  @IsString()
-  rewardId: string;
+  @PrimaryGeneratedColumn()
+  @IsInt()
+  rewardId: number;
 
   @Column({ type: 'varchar', length: 200 })
   @IsString()
@@ -33,7 +27,7 @@ export class RewardEntity {
   rewardType: RewardType;
 
   @OneToMany(
-    'UserRewardEntity',
+    () => UserRewardEntity,
     (userReward: UserRewardEntity) => userReward.reward,
   )
   userRewards: UserRewardEntity[];

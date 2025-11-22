@@ -1,60 +1,51 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
   ManyToOne,
-  JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { IsString, IsEnum, IsDate, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsEnum, IsOptional } from 'class-validator';
 
-import type { UserEntity } from 'src/user/entities/user.entity';
-import type { QuestEntity } from 'src/quest/entities/quest.entity';
-import type { VerificationEntity } from 'src/verification/entities/verification.entity';
-
-export enum QuestStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-  VERIFIED = 'verified',
-}
+import { UserEntity } from 'src/user/entities/user.entity';
+import { QuestEntity } from 'src/quest/entities/quest.entity';
+import { VerificationEntity } from 'src/verification/entities/verification.entity';
+import { QuestStatus } from 'src/user-quest/types/quest-status.type';
 
 @Entity('user_quest')
 export class UserQuestEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
+  @PrimaryGeneratedColumn()
   @IsString()
   userQuestId: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  @IsString()
-  userId: string;
+  @Column({ type: 'int' })
+  @IsInt()
+  userId: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  @IsString()
-  questId: string;
-
-  @Column({ type: 'date' })
-  @IsDate()
-  assignedDate: Date;
+  @Column({ type: 'int' })
+  @IsInt()
+  questId: number;
 
   @Column({ type: 'enum', enum: QuestStatus, default: QuestStatus.PENDING })
   @IsEnum(QuestStatus)
   status: QuestStatus;
 
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
   @Column({ type: 'timestamp', nullable: true })
-  @IsDate()
   @IsOptional()
   completedAt: Date;
 
-  @ManyToOne('UserEntity', (user: UserEntity) => user.userQuests)
-  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => UserEntity, (user: UserEntity) => user.userQuests)
   user: UserEntity;
 
-  @ManyToOne('QuestEntity', (quest: QuestEntity) => quest.userQuests)
-  @JoinColumn({ name: 'quest_id' })
+  @ManyToOne(() => QuestEntity, (quest: QuestEntity) => quest.userQuests)
   quest: QuestEntity;
 
   @OneToMany(
-    'VerificationEntity',
+    () => VerificationEntity,
     (verification: VerificationEntity) => verification.userQuest,
   )
   verifications: VerificationEntity[];

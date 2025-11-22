@@ -1,52 +1,32 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import {
   IsString,
-  IsEmail,
   IsEnum,
   IsInt,
   IsOptional,
   IsUrl,
-  IsBoolean,
   Min,
 } from 'class-validator';
 
-import type { GuardianRelationshipEntity } from 'src/guardian/entities/guardian-relationship.entity';
-import type { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
-import type { VerificationEntity } from 'src/verification/entities/verification.entity';
-import type { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
-
-export enum Provider {
-  GOOGLE = 'google',
-  KAKAO = 'kakao',
-  NAVER = 'naver',
-}
-
-export enum UserRole {
-  GUARDIAN = 'guardian',
-  WARD = 'ward',
-}
+import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
+import { VerificationEntity } from 'src/verification/entities/verification.entity';
+import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
+import { Provider } from 'src/user/types/provider.type';
+import { UserRole } from 'src/user/types/user-role.type';
 
 @Entity('user')
 export class UserEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
-  @IsString()
-  userId: string;
-
-  @Column({ type: 'varchar', length: 100 })
-  @IsString()
-  username: string;
-
-  @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
-  @IsEmail()
-  @IsOptional()
-  email: string;
+  @PrimaryGeneratedColumn()
+  userId: number;
 
   @Column({ type: 'enum', enum: Provider })
   @IsEnum(Provider)
@@ -56,11 +36,19 @@ export class UserEntity {
   @IsString()
   providerId: string;
 
+  @Column({ type: 'enum', enum: UserRole })
+  @IsEnum(UserRole)
+  role: UserRole;
+
+  @Column({ type: 'varchar', length: 15 })
+  @IsString()
+  username: string;
+
   @Column({ type: 'int', nullable: true })
   @IsInt()
   @Min(0)
   @IsOptional()
-  age: number;
+  age?: number | null;
 
   @Column({ type: 'int', default: 1 })
   @IsInt()
@@ -80,46 +68,42 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   @IsUrl()
   @IsOptional()
-  avatarUrl: string;
-
-  @Column({ type: 'enum', enum: UserRole })
-  @IsEnum(UserRole)
-  role: UserRole;
-
-  @Column({ type: 'boolean', default: false })
-  @IsBoolean()
-  isAdmin: boolean;
+  avatarUrl?: string | null;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  lastLoginAt: Date;
+  updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  @IsOptional()
+  deletedAt?: Date | null;
+
+  @ManyToOne(() => UserEntity, (user) => user.mentees, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  mentor: UserEntity;
+
+  @OneToMany(() => UserEntity, (user) => user.mentor)
+  mentees: UserEntity[];
 
   @OneToMany(
-    'GuardianRelationshipEntity',
-    (relationship: GuardianRelationshipEntity) => relationship.guardian,
+    () => UserQuestEntity,
+    (userQuest: UserQuestEntity) => userQuest.user,
   )
-  wards: GuardianRelationshipEntity[];
-
-  @OneToMany(
-    'GuardianRelationshipEntity',
-    (relationship: GuardianRelationshipEntity) => relationship.ward,
-  )
-  guardians: GuardianRelationshipEntity[];
-
-  @OneToMany('UserQuestEntity', (userQuest: UserQuestEntity) => userQuest.user)
   userQuests: UserQuestEntity[];
 
   @OneToMany(
-    'VerificationEntity',
-    (verification: VerificationEntity) => verification.reviewer,
-  )
-  verifications: VerificationEntity[];
-
-  @OneToMany(
-    'UserRewardEntity',
+    () => UserRewardEntity,
     (userReward: UserRewardEntity) => userReward.user,
   )
   userRewards: UserRewardEntity[];
+
+  @OneToMany(
+    () => VerificationEntity,
+    (verification: VerificationEntity) => verification.reviewer,
+  )
+  verifications: VerificationEntity[];
 }
