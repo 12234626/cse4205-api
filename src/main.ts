@@ -5,11 +5,12 @@ import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
+import { AppConfig } from './config/app.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
-  const appConfig = configService.get('app');
+  const appConfig = configService.getOrThrow<AppConfig>('app');
   const logger = new Logger('Bootstrap');
 
   app.enableCors({

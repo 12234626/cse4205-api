@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import appConfig from './config/app.config';
 import typeormConfig from './config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { QuestModule } from './quest/quest.module';
 import { UserQuestModule } from './user-quest/user-quest.module';
@@ -19,14 +21,16 @@ import { VerificationModule } from './verification/verification.module';
       isGlobal: true,
       load: [appConfig, typeormConfig],
     }),
+    PassportModule.register({ property: 'payload' }),
     TypeOrmModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
-        ...(await configService.get('typeorm')),
+        ...(await configService.getOrThrow('typeorm')),
         autoLoadEntities: true,
       }),
       inject: [ConfigService],
       imports: [ConfigModule],
     }),
+    AuthModule,
     UserModule,
     QuestModule,
     UserQuestModule,
