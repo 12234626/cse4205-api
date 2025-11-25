@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import appConfig from './config/app.config';
+import jwtConfig from './config/jwt.config';
 import typeormConfig from './config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,7 +20,7 @@ import { VerificationModule } from './verification/verification.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, typeormConfig],
+      load: [appConfig, jwtConfig, typeormConfig],
     }),
     PassportModule.register({ property: 'payload' }),
     TypeOrmModule.forRootAsync({
