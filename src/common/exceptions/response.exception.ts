@@ -3,19 +3,15 @@ import { HttpException } from '@nestjs/common';
 import { ErrorCode, ErrorHttpStatus } from 'src/common/types/error-code.type';
 
 export class ResponseException extends HttpException {
-  public readonly errorCode: ErrorCode;
-
   constructor(errorCode: ErrorCode, message?: string) {
     const status = ErrorHttpStatus[errorCode];
 
     super(
       {
-        error: {
-          httpStatus: status,
-          code: errorCode,
-          message,
-          timestamp: new Date().toISOString(),
-        },
+        statusCode: status,
+        success: false,
+        error: errorCode,
+        message,
       },
       status,
     );
