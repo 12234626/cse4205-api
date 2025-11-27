@@ -5,7 +5,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { JwtConfig } from 'src/config/jwt.config';
 import { UserEntity } from 'src/user/entities/user.entity';
-import { ProviderResponseDto } from 'src/auth/dtos/provider-response.dto';
+import {
+  GoogleResponseDto,
+  NaverResponseDto,
+  KakaoResponseDto,
+  ProviderResponse,
+} from 'src/auth/dtos/provider-response.dto';
 import { Payload } from 'src/auth/types/payload.type';
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
@@ -52,7 +57,50 @@ export class AuthService {
     }
   }
 
-  async fetchProviderId(provider: Provider, token: string): Promise<string> {
+  private normalizeProviderResponse(
+    provider: Provider,
+    data: unknown,
+  ): ProviderResponse {
+    switch (provider) {
+      case Provider.GOOGLE: {
+        const googleData = data as GoogleResponseDto;
+
+        return {
+          id: googleData.id,
+          nickname: googleData.name,
+          picture: googleData.picture,
+        };
+      }
+
+      case Provider.NAVER: {
+        const naverData = data as NaverResponseDto;
+
+        return {
+          id: naverData.response.id,
+          nickname: naverData.response.nickname,
+          picture: naverData.response.profile_image,
+        };
+      }
+
+      case Provider.KAKAO: {
+        const kakaoData = data as KakaoResponseDto;
+
+        return {
+          id: kakaoData.id,
+          nickname: kakaoData.properties.nickname,
+          picture: kakaoData.properties.profile_image,
+        };
+      }
+
+      default:
+        throw ResponseException.invalidProvider();
+    }
+  }
+
+  async fetchProviderId(
+    provider: Provider,
+    token: string,
+  ): Promise<ProviderResponse> {
     const url = this.getAuthUrl(provider);
     const response = await fetch(url, {
       headers: {
@@ -64,19 +112,25 @@ export class AuthService {
       throw ResponseException.invalidToken();
     }
 
-    const { id } = (await response.json()) as ProviderResponseDto;
+    const data: unknown = await response.json();
+    const providerResponse: ProviderResponse = this.normalizeProviderResponse(
+      provider,
+      data,
+    );
 
-    return id;
+    return providerResponse;
   }
 
   async login(provider: Provider, token: string): Promise<string> {
-    const providerId = await this.fetchProviderId(provider, token);
-    const user = await this.userService.findByProviderId(provider, providerId);
+    const providerResponse = await this.fetchProviderId(provider, token);
+    const user = await this.userService.findByProviderId(
+      provider,
+      providerResponse.id,
+    );
 
     if (!user) {
       throw ResponseException.userNotFound();
     }
-
     if (user.deletedAt) {
       throw ResponseException.userDeleted();
     }
@@ -86,14 +140,14 @@ export class AuthService {
 
   async register(
     provider: Provider,
-    accessToken: string,
+    token: string,
     username: string,
     role: UserRole,
   ): Promise<string> {
-    const providerId = await this.fetchProviderId(provider, accessToken);
+    const providerResponse = await this.fetchProviderId(provider, token);
     const existingUser = await this.userService.findByProviderId(
       provider,
-      providerId,
+      providerResponse.id,
     );
 
     if (existingUser) {
@@ -105,7 +159,7 @@ export class AuthService {
 
     const user = await this.userService.create({
       provider,
-      providerId,
+      providerId: providerResponse.id,
       username,
       role,
     });
