@@ -1,5 +1,7 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { UploadService } from './upload.service';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+
+import { UploadService } from 'src/upload/upload.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 class GeneratePresignedUrlDto {
   fileName: string;
@@ -8,6 +10,7 @@ class GeneratePresignedUrlDto {
 }
 
 @Controller('upload')
+@UseGuards(JwtAuthGuard) // ← 인증된 사용자만 접근 가능
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
