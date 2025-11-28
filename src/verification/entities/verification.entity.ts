@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   OneToMany,
 } from 'typeorm';
@@ -22,7 +23,6 @@ import { ReviewType } from 'src/verification/types/review.type';
 @Entity('verification')
 export class VerificationEntity {
   @PrimaryGeneratedColumn()
-  @IsInt()
   verificationId: number;
 
   @Column({ type: 'int' })
@@ -48,6 +48,10 @@ export class VerificationEntity {
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  @IsOptional()
+  deletedAt?: Date;
 
   @ManyToOne(
     () => UserQuestEntity,

@@ -4,16 +4,16 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
-import { IsInt, IsString, IsUrl } from 'class-validator';
+import { IsOptional, IsString, IsUrl } from 'class-validator';
 
-import type { VerificationEntity } from 'src/verification/entities/verification.entity';
+import { VerificationEntity } from 'src/verification/entities/verification.entity';
 
 @Entity('verification_image')
 export class VerificationImageEntity {
   @PrimaryGeneratedColumn()
-  @IsInt()
-  imageId: number;
+  verificationImageId: number;
 
   @Column({ type: 'int' })
   @IsString()
@@ -26,8 +26,12 @@ export class VerificationImageEntity {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  @IsOptional()
+  deletedAt?: Date;
+
   @ManyToOne(
-    'VerificationEntity',
+    () => VerificationEntity,
     (verification: VerificationEntity) => verification.verificationImages,
   )
   verification: VerificationEntity;

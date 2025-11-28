@@ -2,13 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
-import {
-  CreateUserQuestDto,
-  UpdateUserQuestDto,
-} from 'src/user-quest/dtos/user-quest.dto';
+import { UserQuestEntity } from './entities/user-quest.entity';
+import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
-import { ErrorCode } from 'src/common/types/error-code.type';
 
 @Injectable()
 export class UserQuestService {
@@ -23,13 +19,13 @@ export class UserQuestService {
     });
   }
 
-  async findOne(id: string): Promise<UserQuestEntity> {
+  async findOne(id: number): Promise<UserQuestEntity> {
     const userQuest = await this.userQuestRepository.findOne({
       where: { userQuestId: id },
     });
 
     if (!userQuest) {
-      throw new ResponseException(ErrorCode.NOT_FOUND, 'UserQuest not found');
+      throw ResponseException.userQuestNotFound();
     }
 
     return userQuest;
@@ -39,20 +35,21 @@ export class UserQuestService {
     createUserQuestDto: CreateUserQuestDto,
   ): Promise<UserQuestEntity> {
     const userQuest = this.userQuestRepository.create(createUserQuestDto);
+
     return this.userQuestRepository.save(userQuest);
   }
 
   async update(
-    id: string,
+    id: number,
     updateUserQuestDto: UpdateUserQuestDto,
   ): Promise<UserQuestEntity> {
     const userQuest = await this.findOne(id);
     Object.assign(userQuest, updateUserQuestDto);
+
     return this.userQuestRepository.save(userQuest);
   }
 
-  async remove(id: string): Promise<void> {
-    const userQuest = await this.findOne(id);
-    await this.userQuestRepository.remove(userQuest);
+  async softDelete(id: number): Promise<void> {
+    await this.userQuestRepository.softDelete(id);
   }
 }

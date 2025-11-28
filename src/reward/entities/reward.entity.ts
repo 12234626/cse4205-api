@@ -1,5 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { IsString, IsInt, IsEnum, IsUrl } from 'class-validator';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  DeleteDateColumn,
+} from 'typeorm';
+import { IsString, IsEnum, IsUrl } from 'class-validator';
 
 import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
 import { RewardType } from 'src/reward/types/reward.type';
@@ -7,7 +13,6 @@ import { RewardType } from 'src/reward/types/reward.type';
 @Entity('reward')
 export class RewardEntity {
   @PrimaryGeneratedColumn()
-  @IsInt()
   rewardId: number;
 
   @Column({ type: 'varchar', length: 200 })
@@ -25,6 +30,9 @@ export class RewardEntity {
   @Column({ type: 'enum', enum: RewardType })
   @IsEnum(RewardType)
   rewardType: RewardType;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @OneToMany(
     () => UserRewardEntity,

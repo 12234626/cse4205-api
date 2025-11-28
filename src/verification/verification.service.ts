@@ -2,13 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { VerificationEntity } from 'src/verification/entities/verification.entity';
+import { VerificationEntity } from './entities/verification.entity';
 import {
   CreateVerificationDto,
   UpdateVerificationDto,
-} from 'src/verification/dtos/verification.dto';
+} from './dtos/verification.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
-import { ErrorCode } from 'src/common/types/error-code.type';
 
 @Injectable()
 export class VerificationService {
@@ -29,10 +28,7 @@ export class VerificationService {
     });
 
     if (!verification) {
-      throw new ResponseException(
-        ErrorCode.NOT_FOUND,
-        'Verification not found',
-      );
+      throw ResponseException.verificationNotFound();
     }
 
     return verification;
@@ -44,6 +40,7 @@ export class VerificationService {
     const verification = this.verificationRepository.create(
       createVerificationDto,
     );
+
     return this.verificationRepository.save(verification);
   }
 
@@ -52,12 +49,13 @@ export class VerificationService {
     updateVerificationDto: UpdateVerificationDto,
   ): Promise<VerificationEntity> {
     const verification = await this.findOne(id);
+
     Object.assign(verification, updateVerificationDto);
+
     return this.verificationRepository.save(verification);
   }
 
-  async remove(id: number): Promise<void> {
-    const verification = await this.findOne(id);
-    await this.verificationRepository.remove(verification);
+  async softDelete(id: number): Promise<void> {
+    await this.verificationRepository.softDelete(id);
   }
 }

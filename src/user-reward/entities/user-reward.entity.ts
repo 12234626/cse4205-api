@@ -3,8 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn,
   CreateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { IsInt } from 'class-validator';
 
@@ -14,7 +14,6 @@ import { RewardEntity } from 'src/reward/entities/reward.entity';
 @Entity('user_reward')
 export class UserRewardEntity {
   @PrimaryGeneratedColumn()
-  @IsInt()
   userRewardId: number;
 
   @Column({ type: 'int' })
@@ -28,11 +27,12 @@ export class UserRewardEntity {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
+
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.userRewards)
-  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
   @ManyToOne(() => RewardEntity, (reward: RewardEntity) => reward.userRewards)
-  @JoinColumn({ name: 'reward_id' })
   reward: RewardEntity;
 }

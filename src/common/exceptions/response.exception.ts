@@ -21,10 +21,6 @@ export class ResponseException extends HttpException {
     return new ResponseException(ErrorCode.FORBIDDEN, message);
   }
 
-  static notFound(message?: string): never {
-    throw new ResponseException(ErrorCode.NOT_FOUND, message);
-  }
-
   static userNotFound(message?: string): ResponseException {
     return new ResponseException(ErrorCode.USER_NOT_FOUND, message);
   }
@@ -47,5 +43,25 @@ export class ResponseException extends HttpException {
 
   static invalidToken(message?: string): ResponseException {
     return new ResponseException(ErrorCode.INVALID_TOKEN, message);
+  }
+
+  static questNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.QUEST_NOT_FOUND, message);
+  }
+
+  static userQuestNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.USER_QUEST_NOT_FOUND, message);
+  }
+
+  static rewardNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.REWARD_NOT_FOUND, message);
+  }
+
+  static userRewardNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.USER_REWARD_NOT_FOUND, message);
+  }
+
+  static verificationNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.VERIFICATION_NOT_FOUND, message);
   }
 }

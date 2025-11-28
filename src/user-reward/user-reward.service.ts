@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
-import { CreateUserRewardDto } from 'src/user-reward/dtos/user-reward.dto';
+import { UserRewardEntity } from './entities/user-reward.entity';
+import { CreateUserRewardDto } from './dtos/user-reward.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
-import { ErrorCode } from 'src/common/types/error-code.type';
 
 @Injectable()
 export class UserRewardService {
@@ -26,7 +25,7 @@ export class UserRewardService {
     });
 
     if (!userReward) {
-      throw new ResponseException(ErrorCode.NOT_FOUND, 'UserReward not found');
+      throw ResponseException.userRewardNotFound();
     }
 
     return userReward;
@@ -36,11 +35,11 @@ export class UserRewardService {
     createUserRewardDto: CreateUserRewardDto,
   ): Promise<UserRewardEntity> {
     const userReward = this.userRewardRepository.create(createUserRewardDto);
+
     return this.userRewardRepository.save(userReward);
   }
 
-  async remove(id: number): Promise<void> {
-    const userReward = await this.findOne(id);
-    await this.userRewardRepository.remove(userReward);
+  async softDelete(id: number): Promise<void> {
+    await this.userRewardRepository.softDelete(id);
   }
 }

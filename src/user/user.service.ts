@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { UserEntity } from 'src/user/entities/user.entity';
-import { Provider } from 'src/user/types/provider.type';
-import { UserRole } from 'src/user/types/user-role.type';
+import { UserEntity } from './entities/user.entity';
+import { Provider } from './types/provider.type';
+import { UserRole } from './types/user-role.type';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
 export class UserService {
@@ -13,17 +14,29 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  async findById(id: number): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ where: { userId: id } });
+  async findById(id: number): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { userId: id } });
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    return user;
   }
 
   async findByProviderId(
     provider: Provider,
     providerId: string,
-  ): Promise<UserEntity | null> {
-    return this.userRepository.findOne({
+  ): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
       where: { provider, providerId },
     });
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    return user;
   }
 
   async create(data: {
@@ -37,7 +50,7 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async softDelete(user: UserEntity): Promise<void> {
-    await this.userRepository.softDelete(user.userId);
+  async softDelete(id: number): Promise<void> {
+    await this.userRepository.softDelete(id);
   }
 }

@@ -9,5 +9,6 @@ import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
   imports: [TypeOrmModule.forFeature([UserRewardEntity])],
   controllers: [UserRewardController],
   providers: [UserRewardService],
+  exports: [UserRewardService],
 })
 export class UserRewardModule {}

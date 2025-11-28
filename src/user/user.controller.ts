@@ -12,7 +12,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Delete(':id')
-  async deleteUser(@Req() req: Request, @Param('id') id: number) {
+  async softDelete(@Req() req: Request, @Param('id') id: number) {
     if (!req.user) {
       throw ResponseException.userNotFound();
     }
@@ -20,7 +20,7 @@ export class UserController {
       throw ResponseException.forbidden();
     }
 
-    await this.userService.softDelete(req.user);
+    await this.userService.softDelete(id);
 
     return ResponseDto.noContent();
   }

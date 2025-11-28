@@ -1,5 +1,6 @@
 import {
   Controller,
+  UseGuards,
   Get,
   Post,
   Put,
@@ -8,50 +9,55 @@ import {
   Param,
 } from '@nestjs/common';
 
-import { UserQuestService } from 'src/user-quest/user-quest.service';
-import {
-  CreateUserQuestDto,
-  UpdateUserQuestDto,
-} from 'src/user-quest/dtos/user-quest.dto';
+import { UserQuestService } from './user-quest.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { UserQuestEntity } from './entities/user-quest.entity';
+import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 
 @Controller('user-quest')
+@UseGuards(JwtAuthGuard)
 export class UserQuestController {
   constructor(private readonly userQuestService: UserQuestService) {}
 
   @Get()
   async findAll() {
     const userQuests = await this.userQuestService.findAll();
-    return ResponseDto.ok(userQuests);
+
+    return ResponseDto.ok<UserQuestEntity[]>(userQuests);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     const userQuest = await this.userQuestService.findOne(id);
-    return ResponseDto.ok(userQuest);
+
+    return ResponseDto.ok<UserQuestEntity>(userQuest);
   }
 
   @Post()
   async create(@Body() createUserQuestDto: CreateUserQuestDto) {
     const userQuest = await this.userQuestService.create(createUserQuestDto);
-    return ResponseDto.created(userQuest);
+
+    return ResponseDto.created<UserQuestEntity>(userQuest);
   }
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateUserQuestDto: UpdateUserQuestDto,
   ) {
     const userQuest = await this.userQuestService.update(
       id,
       updateUserQuestDto,
     );
-    return ResponseDto.ok(userQuest);
+
+    return ResponseDto.ok<UserQuestEntity>(userQuest);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    await this.userQuestService.remove(id);
+  async softDelete(@Param('id') id: number) {
+    await this.userQuestService.softDelete(id);
+
     return ResponseDto.noContent();
   }
 }

@@ -5,8 +5,9 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
-import { IsString, IsInt, IsEnum, IsOptional } from 'class-validator';
+import { IsInt, IsEnum, IsOptional } from 'class-validator';
 
 import { UserEntity } from 'src/user/entities/user.entity';
 import { QuestEntity } from 'src/quest/entities/quest.entity';
@@ -16,8 +17,7 @@ import { QuestStatus } from 'src/user-quest/types/quest-status.type';
 @Entity('user_quest')
 export class UserQuestEntity {
   @PrimaryGeneratedColumn()
-  @IsString()
-  userQuestId: string;
+  userQuestId: number;
 
   @Column({ type: 'int' })
   @IsInt()
@@ -37,6 +37,10 @@ export class UserQuestEntity {
   @Column({ type: 'timestamp', nullable: true })
   @IsOptional()
   completedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  @IsOptional()
+  deletedAt?: Date;
 
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.userQuests)
   user: UserEntity;

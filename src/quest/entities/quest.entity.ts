@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  DeleteDateColumn,
+} from 'typeorm';
 import { IsString, IsEnum, IsInt, Min } from 'class-validator';
 
 import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
@@ -7,7 +13,6 @@ import { QuestType, Difficulty } from 'src/quest/types/quest.type';
 @Entity('quest')
 export class QuestEntity {
   @PrimaryGeneratedColumn()
-  @IsInt()
   questId: number;
 
   @Column({ type: 'varchar', length: 200 })
@@ -39,6 +44,9 @@ export class QuestEntity {
   @Column({ type: 'enum', enum: Difficulty })
   @IsEnum(Difficulty)
   difficulty: Difficulty;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @OneToMany(
     () => UserQuestEntity,

@@ -12,5 +12,6 @@ import { VerificationImageEntity } from 'src/verification/entities/verification-
   ],
   controllers: [VerificationController],
   providers: [VerificationService],
+  exports: [VerificationService],
 })
 export class VerificationModule {}
