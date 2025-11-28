@@ -21,6 +21,10 @@ export class ResponseException extends HttpException {
     return new ResponseException(ErrorCode.FORBIDDEN, message);
   }
 
+  static notFound(message?: string): never {
+    throw new ResponseException(ErrorCode.NOT_FOUND, message);
+  }
+
   static userNotFound(message?: string): ResponseException {
     return new ResponseException(ErrorCode.USER_NOT_FOUND, message);
   }
