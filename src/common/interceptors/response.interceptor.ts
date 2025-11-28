@@ -9,8 +9,6 @@ import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { Request, Response } from 'express';
 
-import { ResponseDto } from 'src/common/dtos/response.dto';
-
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   readonly logger = new Logger(ResponseInterceptor.name);
@@ -31,9 +29,11 @@ export class ResponseInterceptor implements NestInterceptor {
     const now = Date.now();
 
     return next.handle().pipe(
-      map((data: ResponseDto<any>) => {
+      map((data: { statusCode?: number }) => {
         if (data?.statusCode) {
           response.status(data.statusCode);
+        } else {
+          data.statusCode = response.statusCode;
         }
 
         return data;
