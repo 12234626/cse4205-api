@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
 import typeormConfig from './config/typeorm.config';
+import awsConfig from './config/aws.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -16,13 +17,14 @@ import { UserQuestModule } from './user-quest/user-quest.module';
 import { RewardModule } from './reward/reward.module';
 import { UserRewardModule } from './user-reward/user-reward.module';
 import { VerificationModule } from './verification/verification.module';
+import { UploadModule } from './upload/upload.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, jwtConfig, typeormConfig],
+      load: [appConfig, jwtConfig, typeormConfig, awsConfig],
     }),
     PassportModule.register({ property: 'payload' }),
     TypeOrmModule.forRootAsync({
@@ -40,6 +42,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     RewardModule,
     UserRewardModule,
     VerificationModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
