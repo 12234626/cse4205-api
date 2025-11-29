@@ -38,10 +38,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       throw ResponseException.userNotFound();
     }
 
-    if (user.deletedAt) {
-      throw ResponseException.userDeleted();
-    }
-
     request.user = user;
 
     const roles = this.reflector.getAllAndOverride<UserRole[]>(USER_ROLES_KEY, [

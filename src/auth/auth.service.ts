@@ -131,9 +131,6 @@ export class AuthService {
     if (!user) {
       throw ResponseException.userNotFound();
     }
-    if (user.deletedAt) {
-      throw ResponseException.userDeleted();
-    }
 
     return this.generateToken(user);
   }
@@ -151,9 +148,6 @@ export class AuthService {
     );
 
     if (existingUser) {
-      if (existingUser.deletedAt) {
-        throw ResponseException.userDeleted();
-      }
       throw ResponseException.userAlreadyExists();
     }
 

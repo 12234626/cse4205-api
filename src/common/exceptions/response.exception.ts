@@ -25,10 +25,6 @@ export class ResponseException extends HttpException {
     return new ResponseException(ErrorCode.USER_NOT_FOUND, message);
   }
 
-  static userDeleted(message?: string): ResponseException {
-    return new ResponseException(ErrorCode.USER_DELETED, message);
-  }
-
   static userAlreadyExists(message?: string): ResponseException {
     return new ResponseException(ErrorCode.USER_ALREADY_EXISTS, message);
   }
