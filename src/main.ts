@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
@@ -36,6 +37,18 @@ async function bootstrap() {
     }),
   );
   app.useStaticAssets('public', { prefix: '/public/' });
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('cse4205-api')
+    .setDescription('cse4205-api 문서')
+    .addBearerAuth()
+    .build();
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig, {
+      ignoreGlobalPrefix: true,
+    });
+
+  SwaggerModule.setup('api/docs', app, documentFactory);
 
   await app.listen(appConfig.port, '0.0.0.0');
 

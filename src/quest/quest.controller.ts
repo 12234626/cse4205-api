@@ -9,6 +9,13 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 import { QuestService } from './quest.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -17,12 +24,26 @@ import { CreateQuestDto, UpdateQuestDto } from './dtos/quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
+@ApiTags('퀘스트')
+@ApiBearerAuth()
 @Controller('quest')
 @UseGuards(JwtAuthGuard)
 export class QuestController {
   constructor(private readonly questService: QuestService) {}
 
   @Get()
+  @ApiOperation({ summary: '전체 퀘스트 조회 또는 제목/카테고리로 검색' })
+  @ApiQuery({
+    name: 'title',
+    required: false,
+    description: '퀘스트 제목 검색어',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: '퀘스트 카테고리',
+  })
+  @ApiResponse({ status: 200, description: '퀘스트 조회 성공' })
   async findAll(
     @Query('title') title?: string,
     @Query('category') category?: string,
@@ -45,6 +66,12 @@ export class QuestController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'ID로 퀘스트 조회' })
+  @ApiResponse({ status: 200, description: '퀘스트 조회 성공' })
+  @ApiResponse({
+    status: 404,
+    description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
+  })
   async findOne(@Param('id') id: number) {
     const quest = await this.questService.findOne(id);
 
@@ -56,6 +83,9 @@ export class QuestController {
   }
 
   @Post()
+  @ApiOperation({ summary: '새 퀘스트 생성' })
+  @ApiResponse({ status: 201, description: '퀘스트 생성 성공' })
+  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async create(@Body() createQuestDto: CreateQuestDto) {
     const quest = await this.questService.create(createQuestDto);
 
@@ -63,6 +93,13 @@ export class QuestController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: '퀘스트 수정' })
+  @ApiResponse({ status: 200, description: '퀘스트 수정 성공' })
+  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
+  @ApiResponse({
+    status: 404,
+    description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
+  })
   async update(
     @Param('id') id: number,
     @Body() updateQuestDto: UpdateQuestDto,
@@ -73,6 +110,12 @@ export class QuestController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: '퀘스트 삭제' })
+  @ApiResponse({ status: 204, description: '퀘스트 삭제 성공' })
+  @ApiResponse({
+    status: 404,
+    description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
+  })
   async softDelete(@Param('id') id: number) {
     await this.questService.softDelete(id);
 

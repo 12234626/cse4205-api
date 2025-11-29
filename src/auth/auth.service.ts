@@ -112,7 +112,10 @@ export class AuthService {
       throw ResponseException.invalidToken();
     }
 
-    const data: unknown = await response.json();
+    const data = (await response.json()) as
+      | GoogleResponseDto
+      | NaverResponseDto
+      | KakaoResponseDto;
     const providerResponse: ProviderResponse = this.normalizeProviderResponse(
       provider,
       data,

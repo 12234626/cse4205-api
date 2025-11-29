@@ -8,6 +8,12 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 import { VerificationService } from './verification.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -19,12 +25,16 @@ import {
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
+@ApiTags('검증')
+@ApiBearerAuth()
 @Controller('verification')
 @UseGuards(JwtAuthGuard)
 export class VerificationController {
   constructor(private readonly verificationService: VerificationService) {}
 
   @Get()
+  @ApiOperation({ summary: '전체 검증 조회' })
+  @ApiResponse({ status: 200, description: '검증 조회 성공' })
   async findAll() {
     const verifications = await this.verificationService.findAll();
 
@@ -32,6 +42,12 @@ export class VerificationController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'ID로 검증 조회' })
+  @ApiResponse({ status: 200, description: '검증 조회 성공' })
+  @ApiResponse({
+    status: 404,
+    description: '검증을 찾을 수 없음 (VERIFICATION_NOT_FOUND)',
+  })
   async findOne(@Param('id') id: number) {
     const verification = await this.verificationService.findOne(id);
 
@@ -43,6 +59,9 @@ export class VerificationController {
   }
 
   @Post()
+  @ApiOperation({ summary: '새 검증 생성' })
+  @ApiResponse({ status: 201, description: '검증 생성 성공' })
+  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async create(@Body() createVerificationDto: CreateVerificationDto) {
     const verification = await this.verificationService.create(
       createVerificationDto,
@@ -52,6 +71,13 @@ export class VerificationController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: '검증 수정' })
+  @ApiResponse({ status: 200, description: '검증 수정 성공' })
+  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
+  @ApiResponse({
+    status: 404,
+    description: '검증을 찾을 수 없음 (VERIFICATION_NOT_FOUND)',
+  })
   async update(
     @Param('id') id: number,
     @Body() updateVerificationDto: UpdateVerificationDto,
@@ -64,6 +90,12 @@ export class VerificationController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: '검증 삭제' })
+  @ApiResponse({ status: 204, description: '검증 삭제 성공' })
+  @ApiResponse({
+    status: 404,
+    description: '검증을 찾을 수 없음 (VERIFICATION_NOT_FOUND)',
+  })
   async softDelete(@Param('id') id: number) {
     await this.verificationService.softDelete(id);
 
