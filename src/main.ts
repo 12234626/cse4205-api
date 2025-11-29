@@ -44,9 +44,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const documentFactory = () =>
-    SwaggerModule.createDocument(app, swaggerConfig, {
-      ignoreGlobalPrefix: true,
-    });
+    SwaggerModule.createDocument(app, swaggerConfig);
 
   SwaggerModule.setup('api/docs', app, documentFactory);
 
