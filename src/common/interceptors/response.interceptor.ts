@@ -32,8 +32,6 @@ export class ResponseInterceptor implements NestInterceptor {
       map((data: { statusCode?: number }) => {
         if (data?.statusCode) {
           response.status(data.statusCode);
-        } else {
-          data.statusCode = response.statusCode;
         }
 
         return data;
