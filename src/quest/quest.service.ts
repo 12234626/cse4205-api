@@ -17,18 +17,6 @@ export class QuestService {
     return this.questRepository.find();
   }
 
-  async searchByTitle(title: string): Promise<QuestEntity[]> {
-    return this.questRepository.find({
-      where: { title: Like(`%${title}%`) },
-    });
-  }
-
-  async findByCategory(category: string): Promise<QuestEntity[]> {
-    return this.questRepository.find({
-      where: { category },
-    });
-  }
-
   async findOne(id: number): Promise<QuestEntity> {
     const quest = await this.questRepository.findOne({
       where: { questId: id },
@@ -39,6 +27,18 @@ export class QuestService {
     }
 
     return quest;
+  }
+
+  async findByTitle(title: string): Promise<QuestEntity[]> {
+    return this.questRepository.find({
+      where: { title: Like(`%${title}%`) },
+    });
+  }
+
+  async findByCategory(category: string): Promise<QuestEntity[]> {
+    return this.questRepository.find({
+      where: { category },
+    });
   }
 
   async create(createQuestDto: CreateQuestDto): Promise<QuestEntity> {

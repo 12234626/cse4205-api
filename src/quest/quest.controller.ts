@@ -27,7 +27,7 @@ export class QuestController {
     @Query('category') category?: string,
   ) {
     if (title) {
-      const quests = await this.questService.searchByTitle(title);
+      const quests = await this.questService.findByTitle(title);
 
       return ResponseDto.ok<QuestEntity[]>(quests);
     }
