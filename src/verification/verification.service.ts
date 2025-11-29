@@ -20,14 +20,10 @@ export class VerificationService {
     return this.verificationRepository.find();
   }
 
-  async findOne(id: number): Promise<VerificationEntity> {
+  async findOne(id: number): Promise<VerificationEntity | null> {
     const verification = await this.verificationRepository.findOne({
       where: { verificationId: id },
     });
-
-    if (!verification) {
-      throw ResponseException.verificationNotFound();
-    }
 
     return verification;
   }
@@ -47,6 +43,10 @@ export class VerificationService {
     updateVerificationDto: UpdateVerificationDto,
   ): Promise<VerificationEntity> {
     const verification = await this.findOne(id);
+
+    if (!verification) {
+      throw ResponseException.verificationNotFound();
+    }
 
     Object.assign(verification, updateVerificationDto);
 

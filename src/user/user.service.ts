@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { Provider } from './types/provider.type';
 import { UserRole } from './types/user-role.type';
-import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
 export class UserService {
@@ -18,12 +17,8 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<UserEntity> {
+  async findOne(id: number): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({ where: { userId: id } });
-
-    if (!user) {
-      throw ResponseException.userNotFound();
-    }
 
     return user;
   }
@@ -31,14 +26,10 @@ export class UserService {
   async findByProviderId(
     provider: Provider,
     providerId: string,
-  ): Promise<UserEntity> {
+  ): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({
       where: { provider, providerId },
     });
-
-    if (!user) {
-      throw ResponseException.userNotFound();
-    }
 
     return user;
   }

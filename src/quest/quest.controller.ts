@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { QuestEntity } from './entities/quest.entity';
 import { CreateQuestDto, UpdateQuestDto } from './dtos/quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Controller('quest')
 @UseGuards(JwtAuthGuard)
@@ -46,6 +47,10 @@ export class QuestController {
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const quest = await this.questService.findOne(id);
+
+    if (!quest) {
+      throw ResponseException.questNotFound();
+    }
 
     return ResponseDto.ok<QuestEntity>(quest);
   }

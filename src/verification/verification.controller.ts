@@ -17,6 +17,7 @@ import {
   UpdateVerificationDto,
 } from './dtos/verification.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Controller('verification')
 @UseGuards(JwtAuthGuard)
@@ -33,6 +34,10 @@ export class VerificationController {
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const verification = await this.verificationService.findOne(id);
+
+    if (!verification) {
+      throw ResponseException.verificationNotFound();
+    }
 
     return ResponseDto.ok<VerificationEntity>(verification);
   }

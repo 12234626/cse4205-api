@@ -17,14 +17,10 @@ export class UserQuestService {
     return this.userQuestRepository.find();
   }
 
-  async findOne(id: number): Promise<UserQuestEntity> {
+  async findOne(id: number): Promise<UserQuestEntity | null> {
     const userQuest = await this.userQuestRepository.findOne({
       where: { userQuestId: id },
     });
-
-    if (!userQuest) {
-      throw ResponseException.userQuestNotFound();
-    }
 
     return userQuest;
   }
@@ -42,6 +38,11 @@ export class UserQuestService {
     updateUserQuestDto: UpdateUserQuestDto,
   ): Promise<UserQuestEntity> {
     const userQuest = await this.findOne(id);
+
+    if (!userQuest) {
+      throw ResponseException.userQuestNotFound();
+    }
+
     Object.assign(userQuest, updateUserQuestDto);
 
     return this.userQuestRepository.save(userQuest);

@@ -17,14 +17,10 @@ export class RewardService {
     return this.rewardRepository.find();
   }
 
-  async findOne(id: number): Promise<RewardEntity> {
+  async findOne(id: number): Promise<RewardEntity | null> {
     const reward = await this.rewardRepository.findOne({
       where: { rewardId: id },
     });
-
-    if (!reward) {
-      throw ResponseException.rewardNotFound();
-    }
 
     return reward;
   }
@@ -40,6 +36,10 @@ export class RewardService {
     updateRewardDto: UpdateRewardDto,
   ): Promise<RewardEntity> {
     const reward = await this.findOne(id);
+
+    if (!reward) {
+      throw ResponseException.rewardNotFound();
+    }
 
     Object.assign(reward, updateRewardDto);
 

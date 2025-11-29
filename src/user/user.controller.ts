@@ -13,10 +13,7 @@ export class UserController {
 
   @Delete(':id')
   async softDelete(@Req() req: Request, @Param('id') id: number) {
-    if (!req.user) {
-      throw ResponseException.userNotFound();
-    }
-    if (req.user.userId !== id) {
+    if (req.user!.userId !== id) {
       throw ResponseException.forbidden();
     }
 

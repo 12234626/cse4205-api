@@ -17,14 +17,10 @@ export class QuestService {
     return this.questRepository.find();
   }
 
-  async findOne(id: number): Promise<QuestEntity> {
+  async findOne(id: number): Promise<QuestEntity | null> {
     const quest = await this.questRepository.findOne({
       where: { questId: id },
     });
-
-    if (!quest) {
-      throw ResponseException.questNotFound();
-    }
 
     return quest;
   }
@@ -52,6 +48,10 @@ export class QuestService {
     updateQuestDto: UpdateQuestDto,
   ): Promise<QuestEntity> {
     const quest = await this.findOne(id);
+
+    if (!quest) {
+      throw ResponseException.questNotFound();
+    }
 
     Object.assign(quest, updateQuestDto);
 

@@ -13,6 +13,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRewardEntity } from './entities/user-reward.entity';
 import { CreateUserRewardDto } from './dtos/user-reward.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Controller('user-reward')
 @UseGuards(JwtAuthGuard)
@@ -29,6 +30,10 @@ export class UserRewardController {
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const userReward = await this.userRewardService.findOne(id);
+
+    if (!userReward) {
+      throw ResponseException.userRewardNotFound();
+    }
 
     return ResponseDto.ok<UserRewardEntity>(userReward);
   }

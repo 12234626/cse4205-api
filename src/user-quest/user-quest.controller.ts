@@ -14,6 +14,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Controller('user-quest')
 @UseGuards(JwtAuthGuard)
@@ -30,6 +31,10 @@ export class UserQuestController {
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const userQuest = await this.userQuestService.findOne(id);
+
+    if (!userQuest) {
+      throw ResponseException.userQuestNotFound();
+    }
 
     return ResponseDto.ok<UserQuestEntity>(userQuest);
   }

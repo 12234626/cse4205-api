@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 
 import { UserRewardEntity } from './entities/user-reward.entity';
 import { CreateUserRewardDto } from './dtos/user-reward.dto';
-import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
 export class UserRewardService {
@@ -17,14 +16,10 @@ export class UserRewardService {
     return this.userRewardRepository.find();
   }
 
-  async findOne(id: number): Promise<UserRewardEntity> {
+  async findOne(id: number): Promise<UserRewardEntity | null> {
     const userReward = await this.userRewardRepository.findOne({
       where: { userRewardId: id },
     });
-
-    if (!userReward) {
-      throw ResponseException.userRewardNotFound();
-    }
 
     return userReward;
   }
