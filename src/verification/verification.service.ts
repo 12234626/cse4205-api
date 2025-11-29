@@ -17,9 +17,7 @@ export class VerificationService {
   ) {}
 
   async findAll(): Promise<VerificationEntity[]> {
-    return this.verificationRepository.find({
-      order: { verificationId: 'DESC' },
-    });
+    return this.verificationRepository.find();
   }
 
   async findOne(id: number): Promise<VerificationEntity> {

@@ -14,9 +14,7 @@ export class RewardService {
   ) {}
 
   async findAll(): Promise<RewardEntity[]> {
-    return this.rewardRepository.find({
-      order: { rewardId: 'DESC' },
-    });
+    return this.rewardRepository.find();
   }
 
   async findOne(id: number): Promise<RewardEntity> {

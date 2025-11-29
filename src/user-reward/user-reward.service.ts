@@ -14,9 +14,7 @@ export class UserRewardService {
   ) {}
 
   async findAll(): Promise<UserRewardEntity[]> {
-    return this.userRewardRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+    return this.userRewardRepository.find();
   }
 
   async findOne(id: number): Promise<UserRewardEntity> {

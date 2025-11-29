@@ -14,22 +14,18 @@ export class QuestService {
   ) {}
 
   async findAll(): Promise<QuestEntity[]> {
-    return this.questRepository.find({
-      order: { questId: 'DESC' },
-    });
+    return this.questRepository.find();
   }
 
   async searchByTitle(title: string): Promise<QuestEntity[]> {
     return this.questRepository.find({
       where: { title: Like(`%${title}%`) },
-      order: { questId: 'DESC' },
     });
   }
 
   async findByCategory(category: string): Promise<QuestEntity[]> {
     return this.questRepository.find({
       where: { category },
-      order: { questId: 'DESC' },
     });
   }
 

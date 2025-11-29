@@ -14,9 +14,7 @@ export class UserQuestService {
   ) {}
 
   async findAll(): Promise<UserQuestEntity[]> {
-    return this.userQuestRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+    return this.userQuestRepository.find();
   }
 
   async findOne(id: number): Promise<UserQuestEntity> {
