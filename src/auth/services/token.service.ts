@@ -103,14 +103,16 @@ export class TokenService {
 
     const tokenPair = this.generateTokenPair(payload);
 
-    await this.revokeTokenPair(refreshToken);
+    await this.revokeToken('refresh', refreshToken);
     await this.saveTokenPair(user, tokenPair);
 
     return tokenPair;
   }
 
-  async revokeTokenPair(refreshToken: string): Promise<void> {
-    await this.tokenRepository.delete({ refreshToken });
+  async revokeToken(type: TokenType, token: string): Promise<void> {
+    await this.tokenRepository.delete({
+      [type === 'access' ? 'accessToken' : 'refreshToken']: token,
+    });
   }
 
   async revokeAllRefreshTokens(user: UserEntity): Promise<void> {

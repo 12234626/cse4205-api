@@ -9,7 +9,7 @@ import type { Request } from 'express';
 
 import { AuthService } from './services/auth.service';
 import { TokenService } from './services/token.service';
-import { JwtRefreshAuthGuard } from './guards/jwt.guard';
+import { JwtAccessAuthGuard, JwtRefreshAuthGuard } from './guards/jwt.guard';
 import { LoginDto, LoginResponseDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
@@ -78,5 +78,29 @@ export class AuthController {
     );
 
     return ResponseDto.ok<TokenPair>(tokenPair);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '로그아웃 (현재 세션)' })
+  @ApiResponse({ status: 204, description: '로그아웃 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async logout(@Req() req: Request) {
+    await this.tokenService.revokeToken('access', req.token);
+
+    return ResponseDto.noContent();
+  }
+
+  @Post('logout-all')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '모든 세션에서 로그아웃' })
+  @ApiResponse({ status: 204, description: '모든 세션 로그아웃 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async logoutAll(@Req() req: Request) {
+    await this.tokenService.revokeAllRefreshTokens(req.user);
+
+    return ResponseDto.noContent();
   }
 }
