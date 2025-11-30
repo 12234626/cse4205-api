@@ -3,9 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   OneToMany,
-  DeleteDateColumn,
 } from 'typeorm';
 import { IsInt, IsEnum, IsOptional } from 'class-validator';
 
@@ -31,12 +31,12 @@ export class UserQuestEntity {
   @IsEnum(QuestStatus)
   status: QuestStatus;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-
   @Column({ type: 'timestamp', nullable: true })
   @IsOptional()
   completedAt: Date;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   @IsOptional()

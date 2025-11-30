@@ -2,8 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
+  CreateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { IsString, IsEnum, IsUrl } from 'class-validator';
 
@@ -30,6 +31,9 @@ export class RewardEntity {
   @Column({ type: 'enum', enum: RewardType })
   @IsEnum(RewardType)
   rewardType: RewardType;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt?: Date;

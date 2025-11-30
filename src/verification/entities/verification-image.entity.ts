@@ -2,9 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { IsOptional, IsString, IsUrl } from 'class-validator';
 

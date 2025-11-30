@@ -2,8 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
+  CreateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { IsString, IsEnum, IsInt, Min } from 'class-validator';
 
@@ -44,6 +45,9 @@ export class QuestEntity {
   @Column({ type: 'enum', enum: Difficulty })
   @IsEnum(Difficulty)
   difficulty: Difficulty;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt?: Date;

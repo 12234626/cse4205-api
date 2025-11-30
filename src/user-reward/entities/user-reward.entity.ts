@@ -2,9 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { IsInt } from 'class-validator';
 
