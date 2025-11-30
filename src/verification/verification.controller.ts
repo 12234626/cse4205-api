@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 
 import { VerificationService } from './verification.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { VerificationEntity } from './entities/verification.entity';
 import {
   CreateVerificationDto,
@@ -28,7 +28,7 @@ import { ResponseException } from 'src/common/exceptions/response.exception';
 @ApiTags('검증')
 @ApiBearerAuth()
 @Controller('verification')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessAuthGuard)
 export class VerificationController {
   constructor(private readonly verificationService: VerificationService) {}
 

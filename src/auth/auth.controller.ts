@@ -1,15 +1,27 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import type { Request } from 'express';
 
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
+import { TokenService } from './services/token.service';
+import { JwtRefreshAuthGuard } from './guards/jwt.guard';
 import { LoginDto, LoginResponseDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
+import { TokenPair } from './types/token.type';
 
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
+  ) {}
 
   @Post('login')
   @ApiOperation({ summary: 'OAuth 로그인' })
@@ -23,12 +35,12 @@ export class AuthController {
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
   })
   async login(@Body() loginDto: LoginDto) {
-    const token = await this.authService.login(
+    const tokenPair = await this.authService.login(
       loginDto.provider,
       loginDto.token,
     );
 
-    return ResponseDto.ok<LoginResponseDto>({ token });
+    return ResponseDto.ok<LoginResponseDto>(tokenPair);
   }
 
   @Post('register')
@@ -43,13 +55,28 @@ export class AuthController {
     description: '이미 존재하는 사용자 (USER_ALREADY_EXISTS)',
   })
   async register(@Body() registerDto: RegisterDto) {
-    const token = await this.authService.register(
+    const tokenPair = await this.authService.register(
       registerDto.provider,
       registerDto.token,
       registerDto.username,
       registerDto.role,
     );
 
-    return ResponseDto.ok<LoginResponseDto>({ token });
+    return ResponseDto.ok<LoginResponseDto>(tokenPair);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '토큰 갱신' })
+  @ApiResponse({ status: 200, description: '토큰 갱신 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async refresh(@Req() req: Request) {
+    const tokenPair = await this.tokenService.refreshTokenPair(
+      req.user,
+      req.token,
+    );
+
+    return ResponseDto.ok<TokenPair>(tokenPair);
   }
 }

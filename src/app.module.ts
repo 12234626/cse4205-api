@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import appConfig from './config/app.config';
@@ -26,7 +26,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
       isGlobal: true,
       load: [appConfig, jwtConfig, typeormConfig, awsConfig],
     }),
-    PassportModule.register({ property: 'payload' }),
+    JwtModule.register({ global: true }),
     TypeOrmModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         ...(await configService.getOrThrow('typeorm')),

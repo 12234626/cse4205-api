@@ -1,15 +1,16 @@
 import { Global, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
+import { TokenService } from './services/token.service';
 import { AuthController } from './auth.controller';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { TokenEntity } from './entities/token.entity';
 
 @Global()
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [TypeOrmModule.forFeature([TokenEntity])],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, TokenService],
+  exports: [AuthService, TokenService],
 })
 export class AuthModule {}

@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger';
 
 import { QuestService } from './quest.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { QuestEntity } from './entities/quest.entity';
 import { CreateQuestDto, UpdateQuestDto } from './dtos/quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
@@ -27,7 +27,7 @@ import { ResponseException } from 'src/common/exceptions/response.exception';
 @ApiTags('퀘스트')
 @ApiBearerAuth()
 @Controller('quest')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessAuthGuard)
 export class QuestController {
   constructor(private readonly questService: QuestService) {}
 

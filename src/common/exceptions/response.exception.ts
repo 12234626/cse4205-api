@@ -17,12 +17,16 @@ export class ResponseException extends HttpException {
     );
   }
 
-  static validationError(message?: string): ResponseException {
-    return new ResponseException(ErrorCode.VALIDATION_ERROR, message);
+  static unauthorized(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.UNAUTHORIZED, message);
   }
 
   static forbidden(message?: string): ResponseException {
     return new ResponseException(ErrorCode.FORBIDDEN, message);
+  }
+
+  static validationError(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.VALIDATION_ERROR, message);
   }
 
   static userNotFound(message?: string): ResponseException {

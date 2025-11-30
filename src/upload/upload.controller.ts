@@ -7,7 +7,7 @@ import {
 } from '@nestjs/swagger';
 
 import { UploadService } from './upload.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import {
   PresignedUrlDto,
   PresignedUrlResponseDto,
@@ -17,7 +17,7 @@ import { ResponseDto } from 'src/common/dtos/response.dto';
 @ApiTags('업로드')
 @ApiBearerAuth()
 @Controller('upload')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessAuthGuard)
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 

@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from 'src/user/user.service';
+import { TokenService } from './token.service';
 import { JwtConfig } from 'src/config/jwt.config';
-import { UserEntity } from 'src/user/entities/user.entity';
 import {
   GoogleResponseDto,
   NaverResponseDto,
   KakaoResponseDto,
   ProviderResponse,
 } from 'src/auth/dtos/provider-response.dto';
-import { Payload } from 'src/auth/types/payload.type';
+import { Payload } from 'src/auth/types/token.type';
+import { TokenPair } from 'src/auth/types/token.type';
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
@@ -22,23 +22,10 @@ export class AuthService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
+    private readonly tokenService: TokenService,
     private readonly userService: UserService,
   ) {
     this.jwtConfig = this.configService.getOrThrow<JwtConfig>('jwt');
-  }
-
-  private generateToken(user: UserEntity): string {
-    const payload: Payload = {
-      sub: user.userId,
-      provider: user.provider,
-      providerId: user.providerId,
-      role: user.role,
-    };
-
-    return this.jwtService.sign(payload, {
-      secret: this.jwtConfig.secret,
-    });
   }
 
   private getAuthUrl(provider: Provider): string {
@@ -124,7 +111,7 @@ export class AuthService {
     return providerResponse;
   }
 
-  async login(provider: Provider, token: string): Promise<string> {
+  async login(provider: Provider, token: string): Promise<TokenPair> {
     const providerResponse = await this.fetchProviderId(provider, token);
     const user = await this.userService.findByProviderId(
       provider,
@@ -135,7 +122,15 @@ export class AuthService {
       throw ResponseException.userNotFound();
     }
 
-    return this.generateToken(user);
+    const payload: Payload = {
+      sub: user.userId,
+      role: user.role,
+    };
+    const tokenPair = this.tokenService.generateTokenPair(payload);
+
+    await this.tokenService.saveTokenPair(user, tokenPair);
+
+    return tokenPair;
   }
 
   async register(
@@ -143,7 +138,7 @@ export class AuthService {
     token: string,
     username: string,
     role: UserRole,
-  ): Promise<string> {
+  ): Promise<TokenPair> {
     const providerResponse = await this.fetchProviderId(provider, token);
     const existingUser = await this.userService.findByProviderId(
       provider,
@@ -160,7 +155,14 @@ export class AuthService {
       username,
       role,
     });
+    const payload: Payload = {
+      sub: user.userId,
+      role: user.role,
+    };
+    const tokenPair = this.tokenService.generateTokenPair(payload);
 
-    return this.generateToken(user);
+    await this.tokenService.saveTokenPair(user, tokenPair);
+
+    return tokenPair;
   }
 }

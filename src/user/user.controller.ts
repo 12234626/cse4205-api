@@ -8,14 +8,14 @@ import {
 } from '@nestjs/swagger';
 
 import { UserService } from './user.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @ApiTags('사용자')
 @ApiBearerAuth()
 @Controller('user')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

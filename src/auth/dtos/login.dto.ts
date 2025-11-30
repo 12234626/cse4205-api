@@ -14,7 +14,11 @@ export class LoginDto {
 }
 
 export class LoginResponseDto {
-  @ApiProperty({ description: 'JWT 인증 토큰' })
+  @ApiProperty({ description: 'JWT 액세스 토큰' })
   @IsString()
-  token: string;
+  accessToken: string;
+
+  @ApiProperty({ description: 'JWT 리프레시 토큰' })
+  @IsString()
+  refreshToken: string;
 }

@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 
 import { UserQuestService } from './user-quest.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
@@ -25,7 +25,7 @@ import { ResponseException } from 'src/common/exceptions/response.exception';
 @ApiTags('사용자 퀘스트')
 @ApiBearerAuth()
 @Controller('user-quest')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessAuthGuard)
 export class UserQuestController {
   constructor(private readonly userQuestService: UserQuestService) {}
 

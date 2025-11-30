@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 
 export enum ErrorCode {
+  UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   USER_NOT_FOUND = 'USER_NOT_FOUND',
@@ -16,6 +17,7 @@ export enum ErrorCode {
 }
 
 export const ErrorHttpStatus: Record<ErrorCode, number> = {
+  [ErrorCode.UNAUTHORIZED]: HttpStatus.UNAUTHORIZED,
   [ErrorCode.FORBIDDEN]: HttpStatus.FORBIDDEN,
   [ErrorCode.VALIDATION_ERROR]: HttpStatus.BAD_REQUEST,
   [ErrorCode.USER_NOT_FOUND]: HttpStatus.NOT_FOUND,

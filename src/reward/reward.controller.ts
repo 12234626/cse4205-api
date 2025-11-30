@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 
 import { RewardService } from './reward.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { RewardEntity } from './entities/reward.entity';
 import { CreateRewardDto, UpdateRewardDto } from './dtos/reward.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
@@ -25,7 +25,7 @@ import { ResponseException } from 'src/common/exceptions/response.exception';
 @ApiTags('보상')
 @ApiBearerAuth()
 @Controller('reward')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAccessAuthGuard)
 export class RewardController {
   constructor(private readonly rewardService: RewardService) {}
 
