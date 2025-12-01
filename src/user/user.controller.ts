@@ -1,4 +1,12 @@
-import { Controller, Delete, UseGuards, Param, Req } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Query,
+  UseGuards,
+  Param,
+  Req,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import {
   ApiTags,
@@ -9,17 +17,28 @@ import {
 
 import { UserService } from './user.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
+import { CheckUsernameResponseDto } from './dtos/check-username.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @ApiTags('사용자')
-@ApiBearerAuth()
 @Controller('user')
-@UseGuards(JwtAccessAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('check-username')
+  @ApiOperation({ summary: '사용자 이름 중복 확인' })
+  @ApiResponse({ status: 200, description: '중복 확인 완료' })
+  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
+  async checkUsername(@Query('username') username: string) {
+    const exists = await this.userService.checkUsernameExists(username);
+
+    return ResponseDto.ok<CheckUsernameResponseDto>({ exists });
+  }
+
   @Delete(':id')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 삭제' })
   @ApiResponse({ status: 204, description: '사용자 삭제 성공' })
   @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })

@@ -34,6 +34,20 @@ export class UserService {
     return user;
   }
 
+  async findByUsername(username: string): Promise<UserEntity | null> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+    });
+
+    return user;
+  }
+
+  async checkUsernameExists(username: string): Promise<boolean> {
+    const user = await this.findByUsername(username);
+
+    return Boolean(user);
+  }
+
   async create(data: {
     provider: Provider;
     providerId: string;
