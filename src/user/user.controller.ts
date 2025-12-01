@@ -28,7 +28,11 @@ export class UserController {
 
   @Get('check-username')
   @ApiOperation({ summary: '사용자 이름 중복 확인' })
-  @ApiResponse({ status: 200, description: '중복 확인 완료' })
+  @ApiResponse({
+    status: 200,
+    description: '중복 확인 완료',
+    type: CheckUsernameResponseDto,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async checkUsername(@Query('username') username: string) {
     const exists = await this.userService.checkUsernameExists(username);

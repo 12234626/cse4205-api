@@ -25,7 +25,11 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'OAuth 로그인' })
-  @ApiResponse({ status: 200, description: '로그인 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '로그인 성공',
+    type: LoginResponseDto,
+  })
   @ApiResponse({
     status: 400,
     description: '잘못된 토큰 (INVALID_TOKEN) / 검증 오류 (VALIDATION_ERROR)',
@@ -45,7 +49,11 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'OAuth 회원가입' })
-  @ApiResponse({ status: 200, description: '회원가입 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '회원가입 성공',
+    type: LoginResponseDto,
+  })
   @ApiResponse({
     status: 400,
     description: '잘못된 토큰 (INVALID_TOKEN) / 검증 오류 (VALIDATION_ERROR)',
@@ -69,7 +77,11 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '토큰 갱신' })
-  @ApiResponse({ status: 200, description: '토큰 갱신 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '토큰 갱신 성공',
+    type: LoginResponseDto,
+  })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   async refresh(@Req() req: Request) {
     const tokenPair = await this.tokenService.refreshTokenPair(

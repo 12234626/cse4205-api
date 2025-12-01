@@ -22,8 +22,8 @@ import { CreateRewardDto, UpdateRewardDto } from './dtos/reward.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
-@ApiTags('보상')
 @ApiBearerAuth()
+@ApiTags('보상')
 @Controller('reward')
 @UseGuards(JwtAccessAuthGuard)
 export class RewardController {
@@ -31,7 +31,11 @@ export class RewardController {
 
   @Get()
   @ApiOperation({ summary: '전체 보상 조회' })
-  @ApiResponse({ status: 200, description: '보상 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '보상 조회 성공',
+    type: [RewardEntity],
+  })
   async findAll() {
     const rewards = await this.rewardService.findAll();
 
@@ -40,7 +44,11 @@ export class RewardController {
 
   @Get(':id')
   @ApiOperation({ summary: 'ID로 보상 조회' })
-  @ApiResponse({ status: 200, description: '보상 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '보상 조회 성공',
+    type: RewardEntity,
+  })
   @ApiResponse({
     status: 404,
     description: '보상을 찾을 수 없음 (REWARD_NOT_FOUND)',
@@ -57,7 +65,11 @@ export class RewardController {
 
   @Post()
   @ApiOperation({ summary: '새 보상 생성' })
-  @ApiResponse({ status: 201, description: '보상 생성 성공' })
+  @ApiResponse({
+    status: 201,
+    description: '보상 생성 성공',
+    type: RewardEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async create(@Body() createRewardDto: CreateRewardDto) {
     const reward = await this.rewardService.create(createRewardDto);
@@ -67,7 +79,11 @@ export class RewardController {
 
   @Put(':id')
   @ApiOperation({ summary: '보상 수정' })
-  @ApiResponse({ status: 200, description: '보상 수정 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '보상 수정 성공',
+    type: RewardEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({
     status: 404,

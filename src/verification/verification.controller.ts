@@ -34,7 +34,11 @@ export class VerificationController {
 
   @Get()
   @ApiOperation({ summary: '전체 검증 조회' })
-  @ApiResponse({ status: 200, description: '검증 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '검증 조회 성공',
+    type: [VerificationEntity],
+  })
   async findAll() {
     const verifications = await this.verificationService.findAll();
 
@@ -43,7 +47,11 @@ export class VerificationController {
 
   @Get(':id')
   @ApiOperation({ summary: 'ID로 검증 조회' })
-  @ApiResponse({ status: 200, description: '검증 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '검증 조회 성공',
+    type: VerificationEntity,
+  })
   @ApiResponse({
     status: 404,
     description: '검증을 찾을 수 없음 (VERIFICATION_NOT_FOUND)',
@@ -60,7 +68,11 @@ export class VerificationController {
 
   @Post()
   @ApiOperation({ summary: '새 검증 생성' })
-  @ApiResponse({ status: 201, description: '검증 생성 성공' })
+  @ApiResponse({
+    status: 201,
+    description: '검증 생성 성공',
+    type: VerificationEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async create(@Body() createVerificationDto: CreateVerificationDto) {
     const verification = await this.verificationService.create(
@@ -72,7 +84,11 @@ export class VerificationController {
 
   @Put(':id')
   @ApiOperation({ summary: '검증 수정' })
-  @ApiResponse({ status: 200, description: '검증 수정 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '검증 수정 성공',
+    type: VerificationEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({
     status: 404,

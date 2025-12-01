@@ -21,8 +21,8 @@ import { CreateUserRewardDto } from './dtos/user-reward.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
-@ApiTags('사용자 보상')
 @ApiBearerAuth()
+@ApiTags('사용자 보상')
 @Controller('user-reward')
 @UseGuards(JwtAccessAuthGuard)
 export class UserRewardController {
@@ -30,7 +30,11 @@ export class UserRewardController {
 
   @Get()
   @ApiOperation({ summary: '전체 사용자 보상 조회' })
-  @ApiResponse({ status: 200, description: '사용자 보상 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '사용자 보상 조회 성공',
+    type: [UserRewardEntity],
+  })
   async findAll() {
     const userRewards = await this.userRewardService.findAll();
 
@@ -39,7 +43,11 @@ export class UserRewardController {
 
   @Get(':id')
   @ApiOperation({ summary: 'ID로 사용자 보상 조회' })
-  @ApiResponse({ status: 200, description: '사용자 보상 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '사용자 보상 조회 성공',
+    type: UserRewardEntity,
+  })
   @ApiResponse({
     status: 404,
     description: '사용자 보상을 찾을 수 없음 (USER_REWARD_NOT_FOUND)',
@@ -56,7 +64,11 @@ export class UserRewardController {
 
   @Post()
   @ApiOperation({ summary: '새 사용자 보상 생성' })
-  @ApiResponse({ status: 201, description: '사용자 보상 생성 성공' })
+  @ApiResponse({
+    status: 201,
+    description: '사용자 보상 생성 성공',
+    type: UserRewardEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async create(@Body() createUserRewardDto: CreateUserRewardDto) {
     const userReward = await this.userRewardService.create(createUserRewardDto);

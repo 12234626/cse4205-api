@@ -24,8 +24,8 @@ import { CreateQuestDto, UpdateQuestDto } from './dtos/quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
-@ApiTags('퀘스트')
 @ApiBearerAuth()
+@ApiTags('퀘스트')
 @Controller('quest')
 @UseGuards(JwtAccessAuthGuard)
 export class QuestController {
@@ -43,7 +43,11 @@ export class QuestController {
     required: false,
     description: '퀘스트 카테고리',
   })
-  @ApiResponse({ status: 200, description: '퀘스트 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '퀘스트 조회 성공',
+    type: [QuestEntity],
+  })
   async findAll(
     @Query('title') title?: string,
     @Query('category') category?: string,
@@ -67,7 +71,11 @@ export class QuestController {
 
   @Get(':id')
   @ApiOperation({ summary: 'ID로 퀘스트 조회' })
-  @ApiResponse({ status: 200, description: '퀘스트 조회 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '퀘스트 조회 성공',
+    type: QuestEntity,
+  })
   @ApiResponse({
     status: 404,
     description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
@@ -84,7 +92,11 @@ export class QuestController {
 
   @Post()
   @ApiOperation({ summary: '새 퀘스트 생성' })
-  @ApiResponse({ status: 201, description: '퀘스트 생성 성공' })
+  @ApiResponse({
+    status: 201,
+    description: '퀘스트 생성 성공',
+    type: QuestEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async create(@Body() createQuestDto: CreateQuestDto) {
     const quest = await this.questService.create(createQuestDto);
@@ -94,7 +106,11 @@ export class QuestController {
 
   @Put(':id')
   @ApiOperation({ summary: '퀘스트 수정' })
-  @ApiResponse({ status: 200, description: '퀘스트 수정 성공' })
+  @ApiResponse({
+    status: 200,
+    description: '퀘스트 수정 성공',
+    type: QuestEntity,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({
     status: 404,

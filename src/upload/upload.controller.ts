@@ -14,8 +14,8 @@ import {
 } from './dtos/presigned-url.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 
-@ApiTags('업로드')
 @ApiBearerAuth()
+@ApiTags('업로드')
 @Controller('upload')
 @UseGuards(JwtAccessAuthGuard)
 export class UploadController {
@@ -23,7 +23,11 @@ export class UploadController {
 
   @Post('presigned-url')
   @ApiOperation({ summary: 'S3 업로드를 위한 Presigned URL 생성' })
-  @ApiResponse({ status: 200, description: 'Presigned URL 생성 성공' })
+  @ApiResponse({
+    status: 200,
+    description: 'Presigned URL 생성 성공',
+    type: PresignedUrlResponseDto,
+  })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   async PresignedUrl(@Body() dto: PresignedUrlDto) {
     return ResponseDto.ok<PresignedUrlResponseDto>(
