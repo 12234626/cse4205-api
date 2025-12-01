@@ -6,7 +6,7 @@ import {
   DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
-import { IsString, IsEnum, IsUrl } from 'class-validator';
+import { IsString, IsEnum, IsUrl, IsOptional } from 'class-validator';
 
 import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
 import { RewardType } from 'src/reward/types/reward.type';
@@ -36,6 +36,7 @@ export class RewardEntity {
   createdAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  @IsOptional()
   deletedAt?: Date;
 
   @OneToMany(

@@ -6,7 +6,7 @@ import {
   DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
-import { IsString, IsEnum, IsInt, Min } from 'class-validator';
+import { IsString, IsEnum, IsInt, Min, IsOptional } from 'class-validator';
 
 import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
 import { QuestType, Difficulty } from 'src/quest/types/quest.type';
@@ -50,6 +50,7 @@ export class QuestEntity {
   createdAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  @IsOptional()
   deletedAt?: Date;
 
   @OneToMany(

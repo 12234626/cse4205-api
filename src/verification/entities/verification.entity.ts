@@ -7,13 +7,7 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import {
-  IsString,
-  IsEnum,
-  IsBoolean,
-  IsOptional,
-  IsInt,
-} from 'class-validator';
+import { IsString, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 
 import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -24,14 +18,6 @@ import { ReviewType } from 'src/verification/types/review.type';
 export class VerificationEntity {
   @PrimaryGeneratedColumn()
   verificationId: number;
-
-  @Column({ type: 'int' })
-  @IsInt()
-  userQuestId: number;
-
-  @Column({ type: 'int' })
-  @IsInt()
-  reviewerId: number;
 
   @Column({ type: 'enum', enum: ReviewType })
   @IsEnum(ReviewType)
@@ -44,7 +30,7 @@ export class VerificationEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   @IsString()
   @IsOptional()
-  comment: string;
+  comment?: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

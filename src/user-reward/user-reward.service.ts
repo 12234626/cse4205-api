@@ -4,12 +4,17 @@ import { Repository } from 'typeorm';
 
 import { UserRewardEntity } from './entities/user-reward.entity';
 import { CreateUserRewardDto } from './dtos/user-reward.dto';
+import { UserService } from 'src/user/user.service';
+import { RewardService } from 'src/reward/reward.service';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
 export class UserRewardService {
   constructor(
     @InjectRepository(UserRewardEntity)
     private readonly userRewardRepository: Repository<UserRewardEntity>,
+    private readonly userService: UserService,
+    private readonly rewardService: RewardService,
   ) {}
 
   async findAll(): Promise<UserRewardEntity[]> {
@@ -27,7 +32,24 @@ export class UserRewardService {
   async create(
     createUserRewardDto: CreateUserRewardDto,
   ): Promise<UserRewardEntity> {
-    const userReward = this.userRewardRepository.create(createUserRewardDto);
+    const user = await this.userService.findOne(createUserRewardDto.userId);
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    const reward = await this.rewardService.findOne(
+      createUserRewardDto.rewardId,
+    );
+
+    if (!reward) {
+      throw ResponseException.rewardNotFound();
+    }
+
+    const userReward = this.userRewardRepository.create({
+      user,
+      reward,
+    });
 
     return this.userRewardRepository.save(userReward);
   }

@@ -8,7 +8,7 @@ import {
 
 import { UserEntity } from 'src/user/entities/user.entity';
 
-@Entity({ name: 'token' })
+@Entity('token')
 export class TokenEntity {
   @PrimaryGeneratedColumn()
   tokenId: number;

@@ -48,7 +48,7 @@ export class UserEntity {
   @IsInt()
   @Min(0)
   @IsOptional()
-  age?: number | null;
+  age?: number;
 
   @Column({ type: 'int', default: 1 })
   @IsInt()
@@ -68,7 +68,7 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   @IsUrl()
   @IsOptional()
-  avatarUrl?: string | null;
+  avatarUrl?: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -77,14 +77,13 @@ export class UserEntity {
   updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  @IsOptional()
-  deletedAt?: Date | null;
+  deletedAt?: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.mentees, {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  mentor: UserEntity;
+  mentor?: UserEntity;
 
   @OneToMany(() => UserEntity, (user) => user.mentor)
   mentees: UserEntity[];

@@ -6,7 +6,7 @@ import {
   DeleteDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsOptional, IsUrl } from 'class-validator';
 
 import { VerificationEntity } from 'src/verification/entities/verification.entity';
 
@@ -14,10 +14,6 @@ import { VerificationEntity } from 'src/verification/entities/verification.entit
 export class VerificationImageEntity {
   @PrimaryGeneratedColumn()
   verificationImageId: number;
-
-  @Column({ type: 'int' })
-  @IsString()
-  verificationId: string;
 
   @Column({ type: 'varchar', length: 500 })
   @IsUrl()

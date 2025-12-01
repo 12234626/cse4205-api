@@ -7,7 +7,7 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { IsInt, IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 
 import { UserEntity } from 'src/user/entities/user.entity';
 import { QuestEntity } from 'src/quest/entities/quest.entity';
@@ -19,21 +19,13 @@ export class UserQuestEntity {
   @PrimaryGeneratedColumn()
   userQuestId: number;
 
-  @Column({ type: 'int' })
-  @IsInt()
-  userId: number;
-
-  @Column({ type: 'int' })
-  @IsInt()
-  questId: number;
-
   @Column({ type: 'enum', enum: QuestStatus, default: QuestStatus.PENDING })
   @IsEnum(QuestStatus)
   status: QuestStatus;
 
   @Column({ type: 'timestamp', nullable: true })
   @IsOptional()
-  completedAt: Date;
+  completedAt?: Date;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
