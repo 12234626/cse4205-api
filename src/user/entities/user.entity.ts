@@ -1,5 +1,6 @@
 import {
   Entity,
+  Unique,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
@@ -23,6 +24,8 @@ import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
 
+@Unique(['provider', 'providerId'])
+@Unique(['username'])
 @Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn()
