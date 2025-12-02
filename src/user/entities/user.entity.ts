@@ -88,24 +88,29 @@ export class UserEntity {
   })
   mentor?: UserEntity;
 
-  @OneToMany(() => UserEntity, (user) => user.mentor)
+  @OneToMany(() => UserEntity, (user) => user.mentor, {
+    cascade: ['soft-remove'],
+  })
   mentees: UserEntity[];
 
   @OneToMany(
     () => UserQuestEntity,
     (userQuest: UserQuestEntity) => userQuest.user,
+    { cascade: ['soft-remove'] },
   )
   userQuests: UserQuestEntity[];
 
   @OneToMany(
     () => UserRewardEntity,
     (userReward: UserRewardEntity) => userReward.user,
+    { cascade: ['soft-remove'] },
   )
   userRewards: UserRewardEntity[];
 
   @OneToMany(
     () => VerificationEntity,
     (verification: VerificationEntity) => verification.reviewer,
+    { cascade: ['soft-remove'] },
   )
   verifications: VerificationEntity[];
 }

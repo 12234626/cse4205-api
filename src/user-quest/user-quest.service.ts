@@ -68,7 +68,13 @@ export class UserQuestService {
     return this.userQuestRepository.save(userQuest);
   }
 
-  async softDelete(id: number): Promise<void> {
-    await this.userQuestRepository.softDelete(id);
+  async softRemove(id: number): Promise<void> {
+    const userQuest = await this.findOne(id);
+
+    if (!userQuest) {
+      throw ResponseException.userQuestNotFound();
+    }
+
+    await this.userQuestRepository.softRemove(userQuest);
   }
 }

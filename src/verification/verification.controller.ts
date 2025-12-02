@@ -112,8 +112,8 @@ export class VerificationController {
     status: 404,
     description: '검증을 찾을 수 없음 (VERIFICATION_NOT_FOUND)',
   })
-  async softDelete(@Param('id') id: number) {
-    await this.verificationService.softDelete(id);
+  async softRemove(@Param('id') id: number) {
+    await this.verificationService.softRemove(id);
 
     return ResponseDto.noContent();
   }

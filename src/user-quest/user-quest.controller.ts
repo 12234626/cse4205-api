@@ -108,8 +108,8 @@ export class UserQuestController {
     status: 404,
     description: '사용자 퀘스트를 찾을 수 없음 (USER_QUEST_NOT_FOUND)',
   })
-  async softDelete(@Param('id') id: number) {
-    await this.userQuestService.softDelete(id);
+  async softRemove(@Param('id') id: number) {
+    await this.userQuestService.softRemove(id);
 
     return ResponseDto.noContent();
   }

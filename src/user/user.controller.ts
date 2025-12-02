@@ -50,7 +50,7 @@ export class UserController {
     status: 404,
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
   })
-  async softDelete(@Req() req: Request, @Param('id') id: number) {
+  async softRemove(@Req() req: Request, @Param('id') id: number) {
     if (!req.user) {
       throw ResponseException.userNotFound();
     }
@@ -58,7 +58,7 @@ export class UserController {
       throw ResponseException.forbidden();
     }
 
-    await this.userService.softDelete(id);
+    await this.userService.softRemove(id);
 
     return ResponseDto.noContent();
   }

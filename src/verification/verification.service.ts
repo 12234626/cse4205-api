@@ -53,7 +53,13 @@ export class VerificationService {
     return this.verificationRepository.save(verification);
   }
 
-  async softDelete(id: number): Promise<void> {
-    await this.verificationRepository.softDelete(id);
+  async softRemove(id: number): Promise<void> {
+    const verification = await this.findOne(id);
+
+    if (!verification) {
+      throw ResponseException.verificationNotFound();
+    }
+
+    await this.verificationRepository.softRemove(verification);
   }
 }

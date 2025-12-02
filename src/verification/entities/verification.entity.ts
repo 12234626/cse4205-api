@@ -51,6 +51,7 @@ export class VerificationEntity {
   @OneToMany(
     () => VerificationImageEntity,
     (image: VerificationImageEntity) => image.verification,
+    { cascade: ['soft-remove'] },
   )
   verificationImages: VerificationImageEntity[];
 }

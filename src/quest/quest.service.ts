@@ -58,7 +58,13 @@ export class QuestService {
     return this.questRepository.save(quest);
   }
 
-  async softDelete(id: number): Promise<void> {
-    await this.questRepository.softDelete(id);
+  async softRemove(id: number): Promise<void> {
+    const quest = await this.findOne(id);
+
+    if (!quest) {
+      throw ResponseException.questNotFound();
+    }
+
+    await this.questRepository.softRemove(quest);
   }
 }

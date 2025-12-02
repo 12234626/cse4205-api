@@ -56,6 +56,7 @@ export class QuestEntity {
   @OneToMany(
     () => UserQuestEntity,
     (userQuest: UserQuestEntity) => userQuest.quest,
+    { cascade: ['soft-remove'] },
   )
   userQuests: UserQuestEntity[];
 }

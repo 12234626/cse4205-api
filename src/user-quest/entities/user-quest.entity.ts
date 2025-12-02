@@ -43,6 +43,7 @@ export class UserQuestEntity {
   @OneToMany(
     () => VerificationEntity,
     (verification: VerificationEntity) => verification.userQuest,
+    { cascade: ['soft-remove'] },
   )
   verifications: VerificationEntity[];
 }

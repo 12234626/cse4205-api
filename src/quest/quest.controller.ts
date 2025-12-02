@@ -132,8 +132,8 @@ export class QuestController {
     status: 404,
     description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
   })
-  async softDelete(@Param('id') id: number) {
-    await this.questService.softDelete(id);
+  async softRemove(@Param('id') id: number) {
+    await this.questService.softRemove(id);
 
     return ResponseDto.noContent();
   }

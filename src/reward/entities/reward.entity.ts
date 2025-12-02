@@ -42,6 +42,7 @@ export class RewardEntity {
   @OneToMany(
     () => UserRewardEntity,
     (userReward: UserRewardEntity) => userReward.reward,
+    { cascade: ['soft-remove'] },
   )
   userRewards: UserRewardEntity[];
 }

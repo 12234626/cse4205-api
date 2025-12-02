@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { Provider } from './types/provider.type';
 import { UserRole } from './types/user-role.type';
+import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
 export class UserService {
@@ -59,7 +60,13 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async softDelete(id: number): Promise<void> {
-    await this.userRepository.softDelete(id);
+  async softRemove(id: number): Promise<void> {
+    const user = await this.findOne(id);
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    await this.userRepository.softRemove(user);
   }
 }

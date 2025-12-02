@@ -105,8 +105,8 @@ export class RewardController {
     status: 404,
     description: '보상을 찾을 수 없음 (REWARD_NOT_FOUND)',
   })
-  async softDelete(@Param('id') id: number) {
-    await this.rewardService.softDelete(id);
+  async softRemove(@Param('id') id: number) {
+    await this.rewardService.softRemove(id);
 
     return ResponseDto.noContent();
   }

@@ -54,7 +54,13 @@ export class UserRewardService {
     return this.userRewardRepository.save(userReward);
   }
 
-  async softDelete(id: number): Promise<void> {
-    await this.userRewardRepository.softDelete(id);
+  async softRemove(id: number): Promise<void> {
+    const userReward = await this.findOne(id);
+
+    if (!userReward) {
+      throw ResponseException.userRewardNotFound();
+    }
+
+    await this.userRewardRepository.softRemove(userReward);
   }
 }
