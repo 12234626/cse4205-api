@@ -30,7 +30,6 @@ export class CreateVerificationDto {
   @ApiPropertyOptional({ description: '검증 코멘트' })
   @IsOptional()
   @IsString()
-  @MaxLength(500)
   comment?: string;
 }
 
