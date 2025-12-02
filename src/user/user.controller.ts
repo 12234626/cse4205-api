@@ -20,6 +20,7 @@ import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { CheckUsernameResponseDto } from './dtos/check-username.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
+import { UserEntity } from './entities/user.entity';
 
 @ApiTags('사용자')
 @Controller('user')
@@ -38,6 +39,20 @@ export class UserController {
     const exists = await this.userService.checkUsernameExists(username);
 
     return ResponseDto.ok<CheckUsernameResponseDto>({ exists });
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '사용자 프로필 조회 (닉네임 등)' })
+  @ApiResponse({
+    status: 200,
+    description: '프로필 조회 성공',
+    type: UserEntity,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  getProfile(@Req() req: Request) {
+    return ResponseDto.ok<UserEntity>(req.user);
   }
 
   @Delete(':id')

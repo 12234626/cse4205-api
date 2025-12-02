@@ -27,7 +27,7 @@ export class VerificationEntity {
   @IsBoolean()
   vote: boolean;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: 'text', nullable: true })
   @IsString()
   @IsOptional()
   comment?: string;
