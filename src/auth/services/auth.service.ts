@@ -138,6 +138,7 @@ export class AuthService {
     token: string,
     username: string,
     role: UserRole,
+    mentorUsername?: string,
   ): Promise<TokenPair> {
     const providerResponse = await this.fetchProviderId(provider, token);
     const existingUser = await this.userService.findByProviderId(
@@ -149,12 +150,14 @@ export class AuthService {
       throw ResponseException.userAlreadyExists();
     }
 
-    const user = await this.userService.create({
+    const user = await this.userService.create(
       provider,
-      providerId: providerResponse.id,
+      providerResponse.id,
       username,
       role,
-    });
+      mentorUsername,
+    );
+
     const payload: Payload = {
       sub: user.userId,
       role: user.role,

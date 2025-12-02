@@ -1,5 +1,5 @@
-import { IsEnum, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
@@ -20,4 +20,9 @@ export class RegisterDto {
   @ApiProperty({ enum: UserRole, description: '사용자 역할' })
   @IsEnum(UserRole)
   role: UserRole;
+
+  @ApiPropertyOptional({ description: '멘토 사용자 이름' })
+  @IsOptional()
+  @IsString()
+  mentorUsername?: string;
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { MentorRequestService } from './mentor-request.service';
 import { UserEntity } from '../entities/user.entity';
 import { Provider } from '../types/provider.type';
 import { UserRole } from '../types/user-role.type';
@@ -12,6 +13,7 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private mentorRequestService: MentorRequestService,
   ) {}
 
   async findAll(): Promise<UserEntity[]> {
@@ -49,13 +51,29 @@ export class UserService {
     return Boolean(user);
   }
 
-  async create(data: {
-    provider: Provider;
-    providerId: string;
-    username: string;
-    role: UserRole;
-  }): Promise<UserEntity> {
-    const user = this.userRepository.create(data);
+  async create(
+    provider: Provider,
+    providerId: string,
+    username: string,
+    role: UserRole,
+    mentorUsername?: string,
+  ): Promise<UserEntity> {
+    const user = this.userRepository.create({
+      provider,
+      providerId,
+      username,
+      role,
+    });
+
+    if (mentorUsername) {
+      const mentor = await this.findByUsername(mentorUsername);
+
+      if (mentor) {
+        await this.mentorRequestService.create(user, {
+          mentorId: mentor.userId,
+        });
+      }
+    }
 
     return this.userRepository.save(user);
   }

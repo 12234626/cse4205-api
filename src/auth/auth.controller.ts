@@ -68,6 +68,7 @@ export class AuthController {
       registerDto.token,
       registerDto.username,
       registerDto.role,
+      registerDto.mentorUsername,
     );
 
     return ResponseDto.created<LoginResponseDto>(tokenPair);
@@ -95,7 +96,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '로그아웃 (현재 세션)' })
+  @ApiOperation({ summary: '현재 세션에서 로그아웃' })
   @ApiResponse({ status: 204, description: '로그아웃 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   async logout(@Req() req: Request) {
@@ -108,7 +109,7 @@ export class AuthController {
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '모든 세션에서 로그아웃' })
-  @ApiResponse({ status: 204, description: '모든 세션 로그아웃 성공' })
+  @ApiResponse({ status: 204, description: '로그아웃 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   async logoutAll(@Req() req: Request) {
     await this.tokenService.revokeAllRefreshTokens(req.user);
