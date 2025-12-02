@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { UserRewardEntity } from './entities/user-reward.entity';
 import { CreateUserRewardDto } from './dtos/user-reward.dto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 import { RewardService } from 'src/reward/reward.service';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 

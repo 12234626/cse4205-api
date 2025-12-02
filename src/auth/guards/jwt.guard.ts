@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
 import { TokenService } from 'src/auth/services/token.service';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 import { USER_ROLES_KEY } from 'src/auth/decorators/role.decorator';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 import { Payload } from 'src/auth/types/token.type';

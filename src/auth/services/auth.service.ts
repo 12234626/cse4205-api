@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 import { TokenService } from './token.service';
 import { JwtConfig } from 'src/config/jwt.config';
 import {

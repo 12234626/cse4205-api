@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { UserEntity } from './entities/user.entity';
-import { Provider } from './types/provider.type';
-import { UserRole } from './types/user-role.type';
+import { UserEntity } from '../entities/user.entity';
+import { Provider } from '../types/provider.type';
+import { UserRole } from '../types/user-role.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
@@ -57,6 +57,19 @@ export class UserService {
   }): Promise<UserEntity> {
     const user = this.userRepository.create(data);
 
+    return this.userRepository.save(user);
+  }
+
+  async update(
+    user: UserEntity,
+    data: Partial<UserEntity>,
+  ): Promise<UserEntity> {
+    Object.assign(user, data);
+
+    return this.userRepository.save(user);
+  }
+
+  async save(user: UserEntity): Promise<UserEntity> {
     return this.userRepository.save(user);
   }
 

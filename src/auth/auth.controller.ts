@@ -50,7 +50,7 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'OAuth 회원가입' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: '회원가입 성공',
     type: LoginResponseDto,
   })
@@ -70,7 +70,7 @@ export class AuthController {
       registerDto.role,
     );
 
-    return ResponseDto.ok<LoginResponseDto>(tokenPair);
+    return ResponseDto.created<LoginResponseDto>(tokenPair);
   }
 
   @Post('refresh')

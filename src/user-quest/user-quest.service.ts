@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 import { QuestService } from 'src/quest/quest.service';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 

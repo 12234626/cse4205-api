@@ -68,4 +68,19 @@ export class ResponseException extends HttpException {
   static verificationNotFound(message?: string): ResponseException {
     return new ResponseException(ErrorCode.VERIFICATION_NOT_FOUND, message);
   }
+
+  static invalidMentorRequest(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.INVALID_MENTOR_REQUEST, message);
+  }
+
+  static mentorRequestNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.MENTOR_REQUEST_NOT_FOUND, message);
+  }
+
+  static mentorRequestAlreadyExists(message?: string): ResponseException {
+    return new ResponseException(
+      ErrorCode.MENTOR_REQUEST_ALREADY_EXIST,
+      message,
+    );
+  }
 }

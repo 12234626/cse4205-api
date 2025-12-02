@@ -82,10 +82,7 @@ export class UserEntity {
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.mentees, {
-    onDelete: 'SET NULL',
-    nullable: true,
-  })
+  @ManyToOne(() => UserEntity, (user) => user.mentees)
   mentor?: UserEntity;
 
   @OneToMany(() => UserEntity, (user) => user.mentor, {
