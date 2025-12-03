@@ -63,22 +63,7 @@ export class VerificationController {
       verifications = await this.verificationService.findAll();
     }
 
-    const response: VerificationResponseDto[] = verifications.map((v) => ({
-      verificationId: v.verificationId,
-      reviewType: v.reviewType,
-      vote: v.vote,
-      comment: v.comment,
-      createdAt: v.createdAt,
-      reviewer: {
-        userId: v.reviewer.userId,
-        username: v.reviewer.username,
-        role: v.reviewer.role,
-        avatarUrl: v.reviewer.avatarUrl,
-        level: v.reviewer.level,
-        exp: v.reviewer.exp,
-      },
-      userQuestId: v.userQuest?.userQuestId,
-    }));
+    const response = verifications.map((v) => this.mapToResponseDto(v));
 
     return ResponseDto.ok<VerificationResponseDto[]>(response);
   }
@@ -100,16 +85,22 @@ export class VerificationController {
   }
 
   @Get('user/:userId')
-  @ApiOperation({ summary: '특정 사용자가 작성한 게시글 조회' })
+  @ApiOperation({ summary: '특정 사용자가 작성한 검증 조회' })
   @ApiResponse({
     status: 200,
-    description: '사용자 게시글 조회 성공',
+    description: '사용자 검증 내역 조회 성공',
     type: [VerificationResponseDto],
   })
   async findByUser(@Param('userId') userId: number) {
     const verifications = await this.verificationService.findByReviewer(userId);
 
-    const response: VerificationResponseDto[] = verifications.map((v) => ({
+    const response = verifications.map((v) => this.mapToResponseDto(v));
+
+    return ResponseDto.ok<VerificationResponseDto[]>(response);
+  }
+
+  private mapToResponseDto(v: VerificationEntity): VerificationResponseDto {
+    return {
       verificationId: v.verificationId,
       reviewType: v.reviewType,
       vote: v.vote,
@@ -124,9 +115,7 @@ export class VerificationController {
         exp: v.reviewer.exp,
       },
       userQuestId: v.userQuest?.userQuestId,
-    }));
-
-    return ResponseDto.ok<VerificationResponseDto[]>(response);
+    };
   }
 
   @Get(':id')
