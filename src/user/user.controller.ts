@@ -23,6 +23,7 @@ import { MentorRequestService } from './services/mentor-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRoles } from 'src/auth/decorators/role.decorator';
 import { CheckUsernameResponseDto } from './dtos/check-username.dto';
+import { PublicProfileDto } from './dtos/public-profile.dto';
 import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
 import { UserEntity } from './entities/user.entity';
 import { MentorRequestEntity } from './entities/mentor-request.entity';
@@ -64,6 +65,38 @@ export class UserController {
     const exists = await this.userService.checkUsernameExists(username);
 
     return ResponseDto.ok<CheckUsernameResponseDto>({ exists });
+  }
+
+  @Get('profile/username/:username')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '닉네임으로 사용자 프로필 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '프로필 조회 성공',
+    type: PublicProfileDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 404,
+    description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
+  })
+  async getProfileByUsername(@Param('username') username: string) {
+    const user = await this.userService.findByUsername(username);
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    const publicProfile: PublicProfileDto = {
+      userId: user.userId,
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      level: user.level,
+      exp: user.exp,
+    };
+
+    return ResponseDto.ok<PublicProfileDto>(publicProfile);
   }
 
   @Get('mentor-requests/sent')
