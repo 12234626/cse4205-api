@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 
 import { VerificationEntity } from './entities/verification.entity';
 import {
@@ -61,5 +61,20 @@ export class VerificationService {
     }
 
     await this.verificationRepository.softRemove(verification);
+  }
+
+  async countTodayReviewsByUser(userId: number): Promise<number> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return this.verificationRepository.count({
+      where: {
+        reviewer: { userId },
+        createdAt: Between(startOfDay, endOfDay),
+      },
+    });
   }
 }
