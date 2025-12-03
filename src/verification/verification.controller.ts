@@ -7,7 +7,9 @@ import {
   Delete,
   Body,
   Param,
+  Req,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -22,6 +24,7 @@ import {
   CreateVerificationDto,
   UpdateVerificationDto,
 } from './dtos/verification.dto';
+import { TodayReviewCountDto } from './dtos/today-count.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
@@ -116,5 +119,21 @@ export class VerificationController {
     await this.verificationService.softRemove(id);
 
     return ResponseDto.noContent();
+  }
+
+  @Get('today/count')
+  @ApiOperation({ summary: '오늘 현재 사용자가 리뷰한 인증글 개수 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '오늘 리뷰한 인증글 개수 조회 성공',
+    type: TodayReviewCountDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async getTodayReviewCount(@Req() req: Request) {
+    const count = await this.verificationService.countTodayReviewsByUser(
+      req.user.userId,
+    );
+
+    return ResponseDto.ok<TodayReviewCountDto>({ count });
   }
 }
