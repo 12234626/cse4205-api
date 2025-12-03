@@ -16,15 +16,13 @@ export class PublicProfileDto {
   @IsOptional()
   avatarUrl?: string | null;
 
-  @ApiPropertyOptional({ description: '레벨' })
+  @ApiProperty({ description: '레벨', default: 1 })
   @IsInt()
   @Min(1)
-  @IsOptional()
-  level?: number | null;
+  level: number;
 
-  @ApiPropertyOptional({ description: '경험치' })
+  @ApiProperty({ description: '경험치', default: 0 })
   @IsInt()
   @Min(0)
-  @IsOptional()
-  exp?: number | null;
+  exp: number;
 }
