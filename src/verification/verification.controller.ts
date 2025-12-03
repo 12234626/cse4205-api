@@ -91,31 +91,16 @@ export class VerificationController {
     description: '사용자 검증 내역 조회 성공',
     type: [VerificationResponseDto],
   })
+  @ApiResponse({
+    status: 404,
+    description: '사용자를 찾을 수 없음 (NOT_FOUND)',
+  })
   async findByUser(@Param('userId') userId: number) {
     const verifications = await this.verificationService.findByReviewer(userId);
 
     const response = verifications.map((v) => this.mapToResponseDto(v));
 
     return ResponseDto.ok<VerificationResponseDto[]>(response);
-  }
-
-  private mapToResponseDto(v: VerificationEntity): VerificationResponseDto {
-    return {
-      verificationId: v.verificationId,
-      reviewType: v.reviewType,
-      vote: v.vote,
-      comment: v.comment,
-      createdAt: v.createdAt,
-      reviewer: {
-        userId: v.reviewer.userId,
-        username: v.reviewer.username,
-        role: v.reviewer.role,
-        avatarUrl: v.reviewer.avatarUrl,
-        level: v.reviewer.level,
-        exp: v.reviewer.exp,
-      },
-      userQuestId: v.userQuest?.userQuestId,
-    };
   }
 
   @Get(':id')
@@ -176,6 +161,27 @@ export class VerificationController {
       updateVerificationDto,
     );
     return ResponseDto.ok<VerificationEntity>(verification);
+  }
+
+  private mapToResponseDto(v: VerificationEntity): VerificationResponseDto {
+    return {
+      verificationId: v.verificationId,
+      reviewType: v.reviewType,
+      vote: v.vote,
+      comment: v.comment,
+      createdAt: v.createdAt,
+      reviewer: v.reviewer
+        ? {
+            userId: v.reviewer.userId,
+            username: v.reviewer.username,
+            role: v.reviewer.role,
+            avatarUrl: v.reviewer.avatarUrl,
+            level: v.reviewer.level,
+            exp: v.reviewer.exp,
+          }
+        : null,
+      userQuestId: v.userQuest?.userQuestId,
+    };
   }
 
   @Delete(':id')
