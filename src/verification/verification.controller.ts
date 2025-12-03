@@ -8,6 +8,7 @@ import {
   Body,
   Param,
   Req,
+  Query,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import {
@@ -15,6 +16,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 import { VerificationService } from './verification.service';
@@ -24,7 +26,9 @@ import {
   CreateVerificationDto,
   UpdateVerificationDto,
 } from './dtos/verification.dto';
+import { VerificationResponseDto } from './dtos/verification-response.dto';
 import { TodayReviewCountDto } from './dtos/today-count.dto';
+import { ReviewType } from './types/review.type';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
@@ -36,16 +40,32 @@ export class VerificationController {
   constructor(private readonly verificationService: VerificationService) {}
 
   @Get()
-  @ApiOperation({ summary: '전체 검증 조회' })
+  @ApiOperation({ summary: '전체 검증 조회 또는 타입별 검증 조회' })
+  @ApiQuery({
+    name: 'reviewType',
+    required: false,
+    enum: ReviewType,
+    description:
+      '검증 타입 (guideline: 가이드라인, mentor: 멘토 검증, community: 커뮤니티 검증)',
+  })
   @ApiResponse({
     status: 200,
     description: '검증 조회 성공',
-    type: [VerificationEntity],
+    type: [VerificationResponseDto],
   })
-  async findAll() {
-    const verifications = await this.verificationService.findAll();
+  async findAll(@Query('reviewType') reviewType?: ReviewType) {
+    let verifications: VerificationEntity[];
 
-    return ResponseDto.ok<VerificationEntity[]>(verifications);
+    if (reviewType) {
+      verifications =
+        await this.verificationService.findByReviewType(reviewType);
+    } else {
+      verifications = await this.verificationService.findAll();
+    }
+
+    const response = verifications.map((v) => this.mapToResponseDto(v));
+
+    return ResponseDto.ok<VerificationResponseDto[]>(response);
   }
 
   @Get('today/count')
@@ -62,6 +82,25 @@ export class VerificationController {
     );
 
     return ResponseDto.ok<TodayReviewCountDto>({ count });
+  }
+
+  @Get('user/:userId')
+  @ApiOperation({ summary: '특정 사용자가 작성한 검증 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '사용자 검증 내역 조회 성공',
+    type: [VerificationResponseDto],
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자를 찾을 수 없음 (NOT_FOUND)',
+  })
+  async findByUser(@Param('userId') userId: number) {
+    const verifications = await this.verificationService.findByReviewer(userId);
+
+    const response = verifications.map((v) => this.mapToResponseDto(v));
+
+    return ResponseDto.ok<VerificationResponseDto[]>(response);
   }
 
   @Get(':id')
@@ -122,6 +161,27 @@ export class VerificationController {
       updateVerificationDto,
     );
     return ResponseDto.ok<VerificationEntity>(verification);
+  }
+
+  private mapToResponseDto(v: VerificationEntity): VerificationResponseDto {
+    return {
+      verificationId: v.verificationId,
+      reviewType: v.reviewType,
+      vote: v.vote,
+      comment: v.comment,
+      createdAt: v.createdAt,
+      reviewer: v.reviewer
+        ? {
+            userId: v.reviewer.userId,
+            username: v.reviewer.username,
+            role: v.reviewer.role,
+            avatarUrl: v.reviewer.avatarUrl,
+            level: v.reviewer.level,
+            exp: v.reviewer.exp,
+          }
+        : null,
+      userQuestId: v.userQuest?.userQuestId,
+    };
   }
 
   @Delete(':id')
