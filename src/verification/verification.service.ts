@@ -7,6 +7,7 @@ import {
   CreateVerificationDto,
   UpdateVerificationDto,
 } from './dtos/verification.dto';
+import { ReviewType } from './types/review.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
@@ -17,7 +18,25 @@ export class VerificationService {
   ) {}
 
   async findAll(): Promise<VerificationEntity[]> {
-    return this.verificationRepository.find();
+    return this.verificationRepository.find({
+      relations: ['reviewer'],
+    });
+  }
+
+  async findByReviewType(
+    reviewType: ReviewType,
+  ): Promise<VerificationEntity[]> {
+    return this.verificationRepository.find({
+      where: { reviewType },
+      relations: ['reviewer'],
+    });
+  }
+
+  async findByReviewer(userId: number): Promise<VerificationEntity[]> {
+    return this.verificationRepository.find({
+      where: { reviewer: { userId } },
+      relations: ['reviewer'],
+    });
   }
 
   async findOne(id: number): Promise<VerificationEntity | null> {
