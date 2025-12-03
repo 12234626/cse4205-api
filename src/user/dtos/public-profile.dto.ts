@@ -18,11 +18,13 @@ export class PublicProfileDto {
 
   @ApiPropertyOptional({ description: '레벨' })
   @IsInt()
+  @Min(1)
   @IsOptional()
   level?: number | null;
 
   @ApiPropertyOptional({ description: '경험치' })
   @IsInt()
+  @Min(0)
   @IsOptional()
   exp?: number | null;
 }
