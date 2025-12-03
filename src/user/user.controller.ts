@@ -91,6 +91,7 @@ export class UserController {
     const publicProfile: PublicProfileDto = {
       userId: user.userId,
       username: user.username,
+      role: user.role,
       avatarUrl: user.avatarUrl,
       level: user.level,
       exp: user.exp,
