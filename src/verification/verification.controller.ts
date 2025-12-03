@@ -48,6 +48,22 @@ export class VerificationController {
     return ResponseDto.ok<VerificationEntity[]>(verifications);
   }
 
+  @Get('today/count')
+  @ApiOperation({ summary: '오늘 현재 사용자가 리뷰한 인증글 개수 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '오늘 리뷰한 인증글 개수 조회 성공',
+    type: TodayReviewCountDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async getTodayReviewCount(@Req() req: Request) {
+    const count = await this.verificationService.countTodayReviewsByUser(
+      req.user.userId,
+    );
+
+    return ResponseDto.ok<TodayReviewCountDto>({ count });
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'ID로 검증 조회' })
   @ApiResponse({
@@ -119,21 +135,5 @@ export class VerificationController {
     await this.verificationService.softRemove(id);
 
     return ResponseDto.noContent();
-  }
-
-  @Get('today/count')
-  @ApiOperation({ summary: '오늘 현재 사용자가 리뷰한 인증글 개수 조회' })
-  @ApiResponse({
-    status: 200,
-    description: '오늘 리뷰한 인증글 개수 조회 성공',
-    type: TodayReviewCountDto,
-  })
-  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  async getTodayReviewCount(@Req() req: Request) {
-    const count = await this.verificationService.countTodayReviewsByUser(
-      req.user.userId,
-    );
-
-    return ResponseDto.ok<TodayReviewCountDto>({ count });
   }
 }
