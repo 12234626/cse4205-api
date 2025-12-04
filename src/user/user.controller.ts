@@ -207,6 +207,7 @@ export class UserController {
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 삭제' })
+  @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({ status: 204, description: '사용자 삭제 성공' })
   @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
   @ApiResponse({
