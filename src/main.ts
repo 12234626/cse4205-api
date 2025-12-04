@@ -32,7 +32,7 @@ async function bootstrap() {
           return Object.values(error.constraints || {}).join(', ');
         });
 
-        return ResponseException.validationError(messages.join('; '));
+        throw ResponseException.validationError(messages.join('; '));
       },
     }),
   );
