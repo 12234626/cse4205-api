@@ -45,12 +45,6 @@ export class UserService {
     return user;
   }
 
-  async checkUsernameExists(username: string): Promise<boolean> {
-    const user = await this.findByUsername(username);
-
-    return Boolean(user);
-  }
-
   async create(
     provider: Provider,
     providerId: string,

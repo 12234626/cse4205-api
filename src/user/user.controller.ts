@@ -4,7 +4,6 @@ import {
   Get,
   Post,
   Put,
-  Query,
   UseGuards,
   Param,
   Body,
@@ -13,6 +12,7 @@ import {
 import {
   ApiTags,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
@@ -22,7 +22,6 @@ import { UserService } from './services/user.service';
 import { MentorRequestService } from './services/mentor-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRoles } from 'src/auth/decorators/role.decorator';
-import { CheckUsernameResponseDto } from './dtos/check-username.dto';
 import { PublicProfileDto } from './dtos/public-profile.dto';
 import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
 import { UserEntity } from './entities/user.entity';
@@ -53,24 +52,11 @@ export class UserController {
     return ResponseDto.ok<UserEntity>(req.user);
   }
 
-  @Get('check-username')
-  @ApiOperation({ summary: '사용자 이름 중복 확인' })
-  @ApiResponse({
-    status: 200,
-    description: '중복 확인 완료',
-    type: CheckUsernameResponseDto,
-  })
-  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
-  async checkUsername(@Query('username') username: string) {
-    const exists = await this.userService.checkUsernameExists(username);
-
-    return ResponseDto.ok<CheckUsernameResponseDto>({ exists });
-  }
-
   @Get('profile/username/:username')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '닉네임으로 사용자 프로필 조회' })
+  @ApiOperation({ summary: '이름으로 사용자 프로필 조회' })
+  @ApiParam({ name: 'username', description: '사용자 닉네임' })
   @ApiResponse({
     status: 200,
     description: '프로필 조회 성공',
@@ -100,7 +86,7 @@ export class UserController {
     return ResponseDto.ok<PublicProfileDto>(publicProfile);
   }
 
-  @Get('mentor-requests/sent')
+  @Get('mentor-request/sent')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTEE)
   @ApiBearerAuth()
@@ -117,7 +103,7 @@ export class UserController {
     return ResponseDto.ok<MentorRequestEntity[]>(requests);
   }
 
-  @Get('mentor-requests/received')
+  @Get('mentor-request/received')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
@@ -134,8 +120,9 @@ export class UserController {
     return ResponseDto.ok<MentorRequestEntity[]>(requests);
   }
 
-  @Post('mentor-requests')
+  @Post('mentor-request')
   @UseGuards(JwtAccessAuthGuard)
+  @UserRoles(UserRole.MENTEE)
   @ApiBearerAuth()
   @ApiOperation({ summary: '멘토 요청 보내기' })
   @ApiResponse({
@@ -165,10 +152,12 @@ export class UserController {
     return ResponseDto.created<MentorRequestEntity>(request);
   }
 
-  @Put('mentor-requests/:id/accept')
+  @Put('mentor-request/:requestId/accept')
   @UseGuards(JwtAccessAuthGuard)
+  @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: '멘토 요청 수락' })
+  @ApiParam({ name: 'requestId', description: '멘토 요청 ID' })
   @ApiResponse({
     status: 200,
     description: '요청 수락 성공',
@@ -184,16 +173,21 @@ export class UserController {
     status: 404,
     description: '요청을 찾을 수 없음 (MENTOR_REQUEST_NOT_FOUND)',
   })
-  async acceptMentorRequest(@Req() req: Request, @Param('id') id: number) {
-    const request = await this.mentorRequestService.accept(req.user, id);
+  async acceptMentorRequest(
+    @Req() req: Request,
+    @Param('requestId') requestId: number,
+  ) {
+    const request = await this.mentorRequestService.accept(req.user, requestId);
 
     return ResponseDto.ok<MentorRequestEntity>(request);
   }
 
-  @Put('mentor-requests/:id/reject')
+  @Put('mentor-request/:requestId/reject')
   @UseGuards(JwtAccessAuthGuard)
+  @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: '멘토 요청 거절' })
+  @ApiParam({ name: 'requestId', description: '멘토 요청 ID' })
   @ApiResponse({
     status: 200,
     description: '요청 거절 성공',
@@ -209,13 +203,16 @@ export class UserController {
     status: 404,
     description: '요청을 찾을 수 없음 (MENTOR_REQUEST_NOT_FOUND)',
   })
-  async rejectMentorRequest(@Req() req: Request, @Param('id') id: number) {
-    const request = await this.mentorRequestService.reject(req.user, id);
+  async rejectMentorRequest(
+    @Req() req: Request,
+    @Param('requestId') requestId: number,
+  ) {
+    const request = await this.mentorRequestService.reject(req.user, requestId);
 
     return ResponseDto.ok<MentorRequestEntity>(request);
   }
 
-  @Delete(':id')
+  @Delete(':userId')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 삭제' })
@@ -225,15 +222,15 @@ export class UserController {
     status: 404,
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
   })
-  async softRemove(@Req() req: Request, @Param('id') id: number) {
+  async softRemove(@Req() req: Request, @Param('userId') userId: number) {
     if (!req.user) {
       throw ResponseException.userNotFound();
     }
-    if (req.user.userId !== id) {
+    if (req.user.userId !== userId) {
       throw ResponseException.forbidden();
     }
 
-    await this.userService.softRemove(id);
+    await this.userService.softRemove(userId);
 
     return ResponseDto.noContent();
   }
