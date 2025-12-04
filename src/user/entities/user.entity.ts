@@ -98,7 +98,7 @@ export class UserEntity {
 
   @ApiPropertyOptional({ description: '멘토', type: () => UserEntity })
   @ManyToOne(() => UserEntity, (user) => user.mentees)
-  mentor?: UserEntity;
+  mentor?: UserEntity | null;
 
   @OneToMany(() => UserEntity, (user) => user.mentor, {
     cascade: ['soft-remove'],
