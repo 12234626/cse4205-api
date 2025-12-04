@@ -45,6 +45,23 @@ export class UserService {
     return user;
   }
 
+  async findMentor(user: UserEntity): Promise<UserEntity | null> {
+    const userWithMentor = await this.userRepository.findOne({
+      where: { userId: user.userId },
+      relations: ['mentor'],
+    });
+
+    return userWithMentor?.mentor || null;
+  }
+
+  async findMentees(user: UserEntity): Promise<UserEntity[]> {
+    const mentees = await this.userRepository.find({
+      where: { mentor: { userId: user.userId } },
+    });
+
+    return mentees;
+  }
+
   async create(
     provider: Provider,
     providerId: string,
