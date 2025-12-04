@@ -270,4 +270,52 @@ export class UserController {
 
     return ResponseDto.noContent();
   }
+
+  @Delete('mentor')
+  @UseGuards(JwtAccessAuthGuard)
+  @UserRoles(UserRole.MENTOR)
+  @ApiOperation({ summary: '내 멘토 제거' })
+  @ApiResponse({ status: 204, description: '멘토 제거 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 404,
+    description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
+  })
+  async removeMyMentor(@Req() req: Request) {
+    await this.userService.removeMentor(req.user);
+
+    return ResponseDto.noContent();
+  }
+
+  @Delete('mentee')
+  @UseGuards(JwtAccessAuthGuard)
+  @UserRoles(UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내 멘티 전체 제거' })
+  @ApiResponse({ status: 204, description: '멘티 전체 제거 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async removeMyMentees(@Req() req: Request) {
+    await this.userService.removeMentees(req.user);
+
+    return ResponseDto.noContent();
+  }
+
+  @Delete('mentee/:menteeId')
+  @UseGuards(JwtAccessAuthGuard)
+  @UserRoles(UserRole.MENTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내 멘티 제거' })
+  @ApiParam({ name: 'menteeId', description: '멘티 ID' })
+  @ApiResponse({ status: 204, description: '멘티 제거 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({
+    status: 404,
+    description: '멘티를 찾을 수 없음 (USER_NOT_FOUND)',
+  })
+  async removeMentee(@Req() req: Request, @Param('menteeId') menteeId: number) {
+    await this.userService.removeMentee(req.user, menteeId);
+
+    return ResponseDto.noContent();
+  }
 }

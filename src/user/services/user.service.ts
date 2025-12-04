@@ -102,6 +102,41 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  async removeMentor(user: UserEntity): Promise<void> {
+    if (!user.mentor) {
+      throw ResponseException.userNotFound();
+    }
+
+    user.mentor = null;
+    await this.userRepository.save(user);
+  }
+
+  async removeMentees(mentor: UserEntity): Promise<void> {
+    const mentees = await this.findMentees(mentor);
+
+    for (const mentee of mentees) {
+      mentee.mentor = null;
+      await this.userRepository.save(mentee);
+    }
+  }
+
+  async removeMentee(mentor: UserEntity, menteeId: number): Promise<void> {
+    const mentee = await this.userRepository.findOne({
+      where: { userId: menteeId },
+    });
+
+    if (!mentee || !mentee.mentor) {
+      throw ResponseException.userNotFound();
+    }
+
+    if (mentee.mentor.userId !== mentor.userId) {
+      throw ResponseException.forbidden();
+    }
+
+    mentee.mentor = null;
+    await this.userRepository.save(mentee);
+  }
+
   async softRemove(id: number): Promise<void> {
     const user = await this.findOne(id);
 
