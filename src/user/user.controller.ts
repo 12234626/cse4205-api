@@ -22,7 +22,7 @@ import { UserService } from './services/user.service';
 import { MentorRequestService } from './services/mentor-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRoles } from 'src/auth/decorators/role.decorator';
-import { PublicProfileDto } from './dtos/public-profile.dto';
+import { UserDto } from './dtos/user.dto';
 import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
 import { UserEntity } from './entities/user.entity';
 import { MentorRequestEntity } from './entities/mentor-request.entity';
@@ -60,7 +60,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '프로필 조회 성공',
-    type: PublicProfileDto,
+    type: UserDto,
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
@@ -74,16 +74,7 @@ export class UserController {
       throw ResponseException.userNotFound();
     }
 
-    const publicProfile: PublicProfileDto = {
-      userId: user.userId,
-      username: user.username,
-      role: user.role,
-      avatarUrl: user.avatarUrl,
-      level: user.level,
-      exp: user.exp,
-    };
-
-    return ResponseDto.ok<PublicProfileDto>(publicProfile);
+    return ResponseDto.ok<UserDto>(new UserDto(user));
   }
 
   @Get('mentor-request/sent')
