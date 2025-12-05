@@ -22,6 +22,7 @@ import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
+import { AssignAllResponseDto } from './dtos/assign-all-response.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 import { UserService } from 'src/user/services/user.service';
@@ -160,6 +161,7 @@ export class UserQuestController {
   @ApiResponse({
     status: 200,
     description: '일일 퀘스트 할당 완료',
+    type: AssignAllResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -179,11 +181,12 @@ export class UserQuestController {
     const successful = results.filter((r) => r.status === 'fulfilled').length;
     const failed = results.filter((r) => r.status === 'rejected').length;
 
-    return ResponseDto.ok({
-      message: '일일 퀘스트 할당 완료',
-      successful,
-      failed,
-      total: users.length,
-    });
+    const response = new AssignAllResponseDto();
+    response.message = '일일 퀘스트 할당 완료';
+    response.successful = successful;
+    response.failed = failed;
+    response.total = users.length;
+
+    return ResponseDto.ok<AssignAllResponseDto>(response);
   }
 }
