@@ -90,18 +90,6 @@ export class MentorRequestService {
     mentorRequest.status = status;
     await this.mentorRequestRepository.save(mentorRequest);
 
-    if (status === RequestStatus.ACCEPTED) {
-      const mentee = await this.userService.findOne(
-        mentorRequest.mentee.userId,
-      );
-
-      if (mentee) {
-        await this.userService.update(mentee, {
-          mentor: mentorRequest.mentor,
-        });
-      }
-    }
-
     return mentorRequest;
   }
 
@@ -109,7 +97,37 @@ export class MentorRequestService {
     mentor: UserEntity,
     requestId: number,
   ): Promise<MentorRequestEntity> {
-    return this.updateStatus(mentor, requestId, RequestStatus.ACCEPTED);
+    const mentorRequest = await this.updateStatus(
+      mentor,
+      requestId,
+      RequestStatus.ACCEPTED,
+    );
+
+    const mentee = await this.userService.findOne(mentorRequest.mentee.userId);
+
+    if (mentee) {
+      await this.userService.update(mentee, {
+        mentor: mentorRequest.mentor,
+      });
+
+      const pendingMentorRequests = await this.mentorRequestRepository.find({
+        where: {
+          mentee: { userId: mentee.userId },
+          status: RequestStatus.PENDING,
+        },
+      });
+
+      await Promise.all(
+        pendingMentorRequests.map(async (request) => {
+          if (request.mentorRequestId !== requestId) {
+            request.status = RequestStatus.REJECTED;
+            await this.mentorRequestRepository.save(request);
+          }
+        }),
+      );
+    }
+
+    return this.mentorRequestRepository.save(mentorRequest);
   }
 
   async reject(
