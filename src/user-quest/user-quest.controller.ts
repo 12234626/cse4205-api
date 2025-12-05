@@ -24,14 +24,14 @@ import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
-@ApiBearerAuth()
 @ApiTags('사용자 퀘스트')
 @Controller('user-quest')
-@UseGuards(JwtAccessAuthGuard)
 export class UserQuestController {
   constructor(private readonly userQuestService: UserQuestService) {}
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '전체 사용자 퀘스트 조회' })
   @ApiResponse({
     status: 200,
@@ -45,6 +45,8 @@ export class UserQuestController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: 'ID로 사용자 퀘스트 조회' })
   @ApiResponse({
     status: 200,
@@ -66,6 +68,8 @@ export class UserQuestController {
   }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '새 사용자 퀘스트 생성' })
   @ApiResponse({
     status: 201,
@@ -80,6 +84,8 @@ export class UserQuestController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '사용자 퀘스트 수정' })
   @ApiResponse({
     status: 200,
@@ -104,6 +110,8 @@ export class UserQuestController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '사용자 퀘스트 삭제' })
   @ApiResponse({ status: 204, description: '사용자 퀘스트 삭제 성공' })
   @ApiResponse({
@@ -117,6 +125,8 @@ export class UserQuestController {
   }
 
   @Post('daily/assign')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '오늘의 일일 퀘스트 할당' })
   @ApiResponse({
     status: 201,
@@ -137,5 +147,29 @@ export class UserQuestController {
     );
 
     return ResponseDto.created<UserQuestEntity[]>(userQuests);
+  }
+
+  @Post('daily/assign-all')
+  @ApiOperation({ summary: '모든 사용자 일일 퀘스트 할당 (Lambda용)' })
+  @ApiResponse({
+    status: 200,
+    description: '일일 퀘스트 할당 완료',
+  })
+  async assignAllDailyQuests() {
+    const users = await this.userQuestService['userService'].findAll();
+
+    const results = await Promise.allSettled(
+      users.map((user) => this.userQuestService.assignDailyQuests(user.userId)),
+    );
+
+    const successful = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+
+    return ResponseDto.ok({
+      message: 'Daily quest assignment completed',
+      successful,
+      failed,
+      total: users.length,
+    });
   }
 }
