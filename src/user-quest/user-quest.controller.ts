@@ -19,15 +19,20 @@ import type { Request } from 'express';
 
 import { UserQuestService } from './user-quest.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
+import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
+import { UserService } from 'src/user/services/user.service';
 
 @ApiTags('사용자 퀘스트')
 @Controller('user-quest')
 export class UserQuestController {
-  constructor(private readonly userQuestService: UserQuestService) {}
+  constructor(
+    private readonly userQuestService: UserQuestService,
+    private readonly userService: UserService,
+  ) {}
 
   @Get()
   @ApiBearerAuth()
@@ -150,13 +155,22 @@ export class UserQuestController {
   }
 
   @Post('daily/assign-all')
+  @UseGuards(ApiKeyGuard)
   @ApiOperation({ summary: '모든 사용자 일일 퀘스트 할당 (Lambda용)' })
   @ApiResponse({
     status: 200,
     description: '일일 퀘스트 할당 완료',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'API 키 인증 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '서버 오류',
+  })
   async assignAllDailyQuests() {
-    const users = await this.userQuestService['userService'].findAll();
+    const users = await this.userService.findAll();
 
     const results = await Promise.allSettled(
       users.map((user) => this.userQuestService.assignDailyQuests(user.userId)),
@@ -166,7 +180,7 @@ export class UserQuestController {
     const failed = results.filter((r) => r.status === 'rejected').length;
 
     return ResponseDto.ok({
-      message: 'Daily quest assignment completed',
+      message: '일일 퀘스트 할당 완료',
       successful,
       failed,
       total: users.length,
