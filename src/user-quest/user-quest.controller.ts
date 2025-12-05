@@ -19,19 +19,25 @@ import type { Request } from 'express';
 
 import { UserQuestService } from './user-quest.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
+import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
+import { AssignAllResponseDto } from './dtos/assign-all-response.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
+import { UserService } from 'src/user/services/user.service';
 
-@ApiBearerAuth()
 @ApiTags('사용자 퀘스트')
 @Controller('user-quest')
-@UseGuards(JwtAccessAuthGuard)
 export class UserQuestController {
-  constructor(private readonly userQuestService: UserQuestService) {}
+  constructor(
+    private readonly userQuestService: UserQuestService,
+    private readonly userService: UserService,
+  ) {}
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '전체 사용자 퀘스트 조회' })
   @ApiResponse({
     status: 200,
@@ -45,6 +51,8 @@ export class UserQuestController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: 'ID로 사용자 퀘스트 조회' })
   @ApiResponse({
     status: 200,
@@ -66,6 +74,8 @@ export class UserQuestController {
   }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '새 사용자 퀘스트 생성' })
   @ApiResponse({
     status: 201,
@@ -80,6 +90,8 @@ export class UserQuestController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '사용자 퀘스트 수정' })
   @ApiResponse({
     status: 200,
@@ -104,6 +116,8 @@ export class UserQuestController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '사용자 퀘스트 삭제' })
   @ApiResponse({ status: 204, description: '사용자 퀘스트 삭제 성공' })
   @ApiResponse({
@@ -117,6 +131,8 @@ export class UserQuestController {
   }
 
   @Post('daily/assign')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '오늘의 일일 퀘스트 할당' })
   @ApiResponse({
     status: 201,
@@ -137,5 +153,40 @@ export class UserQuestController {
     );
 
     return ResponseDto.created<UserQuestEntity[]>(userQuests);
+  }
+
+  @Post('daily/assign-all')
+  @UseGuards(ApiKeyGuard)
+  @ApiOperation({ summary: '모든 사용자 일일 퀘스트 할당 (Lambda용)' })
+  @ApiResponse({
+    status: 200,
+    description: '일일 퀘스트 할당 완료',
+    type: AssignAllResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'API 키 인증 실패',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '서버 오류',
+  })
+  async assignAllDailyQuests() {
+    const users = await this.userService.findAll();
+
+    const results = await Promise.allSettled(
+      users.map((user) => this.userQuestService.assignDailyQuests(user.userId)),
+    );
+
+    const successful = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+
+    const response = new AssignAllResponseDto();
+    response.message = '일일 퀘스트 할당 완료';
+    response.successful = successful;
+    response.failed = failed;
+    response.total = users.length;
+
+    return ResponseDto.ok<AssignAllResponseDto>(response);
   }
 }
