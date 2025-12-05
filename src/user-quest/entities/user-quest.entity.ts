@@ -13,6 +13,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { QuestEntity } from 'src/quest/entities/quest.entity';
 import { QuestStatus } from 'src/user-quest/types/quest-status.type';
+import { QuestApprovalRequestEntity } from 'src/quest-approval-request/entities/quest-approval-request.entity';
 
 @Entity('user_quest')
 export class UserQuestEntity {
@@ -50,4 +51,11 @@ export class UserQuestEntity {
   @ApiProperty({ description: '퀘스트', type: () => QuestEntity })
   @ManyToOne(() => QuestEntity, (quest: QuestEntity) => quest.userQuests)
   quest: QuestEntity;
+
+  @OneToMany(
+    () => QuestApprovalRequestEntity,
+    (approvalRequest) => approvalRequest.userQuest,
+    { cascade: true },
+  )
+  approvalRequests: QuestApprovalRequestEntity[];
 }
