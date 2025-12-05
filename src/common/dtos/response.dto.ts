@@ -3,10 +3,10 @@ import { HttpStatus } from '@nestjs/common';
 export class ResponseDto<T> {
   readonly statusCode: number;
   readonly success: boolean = true;
-  readonly data: T;
+  readonly data?: T;
   readonly message?: string;
 
-  constructor(statusCode: number, data: T, message?: string) {
+  constructor(statusCode: number, data?: T, message?: string) {
     this.statusCode = statusCode;
     this.data = data;
     this.message = message;
@@ -25,6 +25,6 @@ export class ResponseDto<T> {
   }
 
   static noContent(): ResponseDto<null> {
-    return new ResponseDto<null>(HttpStatus.NO_CONTENT, null);
+    return new ResponseDto(HttpStatus.NO_CONTENT);
   }
 }

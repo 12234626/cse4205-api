@@ -16,7 +16,6 @@ import { QuestModule } from './quest/quest.module';
 import { UserQuestModule } from './user-quest/user-quest.module';
 import { RewardModule } from './reward/reward.module';
 import { UserRewardModule } from './user-reward/user-reward.module';
-import { VerificationModule } from './verification/verification.module';
 import { UploadModule } from './upload/upload.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
@@ -41,7 +40,6 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     UserQuestModule,
     RewardModule,
     UserRewardModule,
-    VerificationModule,
     UploadModule,
   ],
   controllers: [AppController],

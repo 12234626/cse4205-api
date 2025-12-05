@@ -65,10 +65,6 @@ export class ResponseException extends HttpException {
     return new ResponseException(ErrorCode.USER_REWARD_NOT_FOUND, message);
   }
 
-  static verificationNotFound(message?: string): ResponseException {
-    return new ResponseException(ErrorCode.VERIFICATION_NOT_FOUND, message);
-  }
-
   static invalidMentorRequest(message?: string): ResponseException {
     return new ResponseException(ErrorCode.INVALID_MENTOR_REQUEST, message);
   }

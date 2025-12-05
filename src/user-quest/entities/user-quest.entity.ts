@@ -12,7 +12,6 @@ import { IsEnum, IsOptional } from 'class-validator';
 
 import { UserEntity } from 'src/user/entities/user.entity';
 import { QuestEntity } from 'src/quest/entities/quest.entity';
-import { VerificationEntity } from 'src/verification/entities/verification.entity';
 import { QuestStatus } from 'src/user-quest/types/quest-status.type';
 
 @Entity('user_quest')
@@ -51,11 +50,4 @@ export class UserQuestEntity {
   @ApiProperty({ description: '퀘스트', type: () => QuestEntity })
   @ManyToOne(() => QuestEntity, (quest: QuestEntity) => quest.userQuests)
   quest: QuestEntity;
-
-  @OneToMany(
-    () => VerificationEntity,
-    (verification: VerificationEntity) => verification.userQuest,
-    { cascade: ['soft-remove'] },
-  )
-  verifications: VerificationEntity[];
 }
