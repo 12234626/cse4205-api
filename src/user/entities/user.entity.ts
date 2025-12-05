@@ -20,7 +20,6 @@ import {
 } from 'class-validator';
 
 import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
-import { VerificationEntity } from 'src/verification/entities/verification.entity';
 import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
@@ -118,11 +117,4 @@ export class UserEntity {
     { cascade: ['soft-remove'] },
   )
   userRewards: UserRewardEntity[];
-
-  @OneToMany(
-    () => VerificationEntity,
-    (verification: VerificationEntity) => verification.reviewer,
-    { cascade: ['soft-remove'] },
-  )
-  verifications: VerificationEntity[];
 }
