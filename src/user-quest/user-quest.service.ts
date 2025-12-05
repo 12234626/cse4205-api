@@ -137,59 +137,18 @@ export class UserQuestService {
           throw ResponseException.questNotFound();
         }
 
-        const yesterday6AM = new Date(today6AM);
-        yesterday6AM.setDate(yesterday6AM.getDate() - 1);
-
-        const previousFixedQuests = await transactionalEntityManager.find(
-          UserQuestEntity,
-          {
-            where: {
-              user: { userId },
-              createdAt: MoreThanOrEqual(yesterday6AM),
-            },
-            relations: ['quest'],
-          },
-        );
-
-        const assignedQuests: UserQuestEntity[] = [];
+        const randomQuests = this.getRandomQuests(randomQuestPool, 2);
 
         const fixedQuestsToAssign = fixedQuests.slice(0, 2);
-        for (const fixedQuest of fixedQuestsToAssign) {
-          const existingFixed = previousFixedQuests.find(
-            (pq) =>
-              pq.quest.questId === fixedQuest.questId &&
-              (pq.quest.title.includes('출석') ||
-                pq.quest.title.includes('검증')),
-          );
+        const allQuestsToAssign = [...fixedQuestsToAssign, ...randomQuests];
 
-          if (existingFixed) {
-            existingFixed.status = QuestStatus.PENDING;
-            existingFixed.completedAt = undefined;
-            existingFixed.createdAt = new Date();
-            assignedQuests.push(existingFixed);
-          } else {
-            const userQuest = transactionalEntityManager.create(
-              UserQuestEntity,
-              {
-                user,
-                quest: fixedQuest,
-                status: QuestStatus.PENDING,
-              },
-            );
-            assignedQuests.push(userQuest);
-          }
-        }
-
-        const randomQuests = this.getRandomQuests(randomQuestPool, 2);
-        const randomUserQuests = randomQuests.map((quest) =>
+        const assignedQuests = allQuestsToAssign.map((quest) =>
           transactionalEntityManager.create(UserQuestEntity, {
             user,
             quest,
             status: QuestStatus.PENDING,
           }),
         );
-
-        assignedQuests.push(...randomUserQuests);
 
         const savedQuests =
           await transactionalEntityManager.save(assignedQuests);
