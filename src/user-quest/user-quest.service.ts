@@ -91,11 +91,11 @@ export class UserQuestService {
         }
 
         const now = new Date();
-        const today6AM = new Date(now);
-        today6AM.setHours(6, 0, 0, 0);
+        const today6AMUTC = new Date(now);
+        today6AMUTC.setUTCHours(21, 0, 0, 0);
 
-        if (now.getHours() < 6) {
-          today6AM.setDate(today6AM.getDate() - 1);
+        if (now.getUTCHours() < 21) {
+          today6AMUTC.setUTCDate(today6AMUTC.getUTCDate() - 1);
         }
 
         const existingQuests = await transactionalEntityManager.find(
@@ -103,7 +103,7 @@ export class UserQuestService {
           {
             where: {
               user: { userId },
-              createdAt: MoreThanOrEqual(today6AM),
+              createdAt: MoreThanOrEqual(today6AMUTC),
             },
             relations: ['quest'],
           },
