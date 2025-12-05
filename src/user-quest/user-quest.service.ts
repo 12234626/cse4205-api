@@ -82,78 +82,129 @@ export class UserQuestService {
   }
 
   async assignDailyQuests(userId: number): Promise<UserQuestEntity[]> {
-    const user = await this.userService.findOne(userId);
+    return await this.userQuestRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const user = await this.userService.findOne(userId);
 
-    if (!user) {
-      throw ResponseException.userNotFound();
-    }
+        if (!user) {
+          throw ResponseException.userNotFound();
+        }
 
-    const now = new Date();
-    const today6AM = new Date(now);
-    today6AM.setHours(6, 0, 0, 0);
+        const now = new Date();
+        const today6AM = new Date(now);
+        today6AM.setHours(6, 0, 0, 0);
 
-    if (now.getHours() < 6) {
-      today6AM.setDate(today6AM.getDate() - 1);
-    }
+        if (now.getHours() < 6) {
+          today6AM.setDate(today6AM.getDate() - 1);
+        }
 
-    const existingQuests = await this.userQuestRepository.find({
-      where: {
-        user: { userId },
-        createdAt: MoreThanOrEqual(today6AM),
+        const existingQuests = await transactionalEntityManager.find(
+          UserQuestEntity,
+          {
+            where: {
+              user: { userId },
+              createdAt: MoreThanOrEqual(today6AM),
+            },
+            relations: ['quest'],
+          },
+        );
+
+        if (existingQuests.length > 0) {
+          return existingQuests;
+        }
+
+        const allQuests = await this.questService.findAll();
+
+        const fixedQuests = allQuests.filter(
+          (quest) =>
+            quest.questType === QuestType.DAILY &&
+            (quest.title.includes('출석') || quest.title.includes('검증')),
+        );
+
+        const randomQuestPool = allQuests.filter(
+          (quest) =>
+            quest.questType === QuestType.DAILY &&
+            quest.levelRequired <= user.level &&
+            !quest.title.includes('출석') &&
+            !quest.title.includes('검증'),
+        );
+
+        if (fixedQuests.length < 2) {
+          throw ResponseException.questNotFound();
+        }
+
+        if (randomQuestPool.length < 2) {
+          throw ResponseException.questNotFound();
+        }
+
+        const yesterday6AM = new Date(today6AM);
+        yesterday6AM.setDate(yesterday6AM.getDate() - 1);
+
+        const previousFixedQuests = await transactionalEntityManager.find(
+          UserQuestEntity,
+          {
+            where: {
+              user: { userId },
+              createdAt: MoreThanOrEqual(yesterday6AM),
+            },
+            relations: ['quest'],
+          },
+        );
+
+        const assignedQuests: UserQuestEntity[] = [];
+
+        const fixedQuestsToAssign = fixedQuests.slice(0, 2);
+        for (const fixedQuest of fixedQuestsToAssign) {
+          const existingFixed = previousFixedQuests.find(
+            (pq) =>
+              pq.quest.questId === fixedQuest.questId &&
+              (pq.quest.title.includes('출석') ||
+                pq.quest.title.includes('검증')),
+          );
+
+          if (existingFixed) {
+            existingFixed.status = QuestStatus.PENDING;
+            existingFixed.completedAt = undefined;
+            existingFixed.createdAt = new Date();
+            assignedQuests.push(existingFixed);
+          } else {
+            const userQuest = transactionalEntityManager.create(
+              UserQuestEntity,
+              {
+                user,
+                quest: fixedQuest,
+                status: QuestStatus.PENDING,
+              },
+            );
+            assignedQuests.push(userQuest);
+          }
+        }
+
+        const randomQuests = this.getRandomQuests(randomQuestPool, 2);
+        const randomUserQuests = randomQuests.map((quest) =>
+          transactionalEntityManager.create(UserQuestEntity, {
+            user,
+            quest,
+            status: QuestStatus.PENDING,
+          }),
+        );
+
+        assignedQuests.push(...randomUserQuests);
+
+        const savedQuests =
+          await transactionalEntityManager.save(assignedQuests);
+
+        return savedQuests;
       },
-      relations: ['quest'],
-    });
-
-    if (existingQuests.length > 0) {
-      return existingQuests;
-    }
-
-    const allQuests = await this.questService.findAll();
-
-    const fixedQuests = allQuests.filter(
-      (quest) =>
-        quest.questType === QuestType.DAILY &&
-        (quest.title.includes('출석') || quest.title.includes('검증')),
     );
-
-    const randomQuestPool = allQuests.filter(
-      (quest) =>
-        quest.questType === QuestType.DAILY &&
-        quest.levelRequired <= user.level &&
-        !quest.title.includes('출석') &&
-        !quest.title.includes('검증'),
-    );
-
-    if (fixedQuests.length < 2) {
-      throw ResponseException.questNotFound();
-    }
-
-    if (randomQuestPool.length < 2) {
-      throw ResponseException.questNotFound();
-    }
-
-    const randomQuests = this.getRandomQuests(randomQuestPool, 2);
-
-    const selectedQuests = [...fixedQuests.slice(0, 2), ...randomQuests];
-
-    const assignedQuests: UserQuestEntity[] = [];
-
-    for (const quest of selectedQuests) {
-      const userQuest = this.userQuestRepository.create({
-        user,
-        quest,
-        status: QuestStatus.PENDING,
-      });
-
-      const saved = await this.userQuestRepository.save(userQuest);
-      assignedQuests.push(saved);
-    }
-
-    return assignedQuests;
   }
 
   private getRandomQuests(quests: QuestEntity[], count: number): QuestEntity[] {
-    const shuffled = [...quests].sort(() => Math.random() - 0.5);
+    const shuffled = [...quests];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     return shuffled.slice(0, count);
   }
 }
