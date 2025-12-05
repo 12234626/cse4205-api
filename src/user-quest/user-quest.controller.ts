@@ -7,6 +7,7 @@ import {
   Delete,
   Body,
   Param,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,6 +15,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import type { Request } from 'express';
 
 import { UserQuestService } from './user-quest.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -112,5 +114,28 @@ export class UserQuestController {
     await this.userQuestService.softRemove(id);
 
     return ResponseDto.noContent();
+  }
+
+  @Post('daily/assign')
+  @ApiOperation({ summary: '오늘의 일일 퀘스트 할당' })
+  @ApiResponse({
+    status: 201,
+    description: '일일 퀘스트 할당 성공',
+    type: [UserQuestEntity],
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패 (UNAUTHORIZED)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 또는 퀘스트를 찾을 수 없음 (NOT_FOUND)',
+  })
+  async assignDailyQuests(@Req() req: Request) {
+    const userQuests = await this.userQuestService.assignDailyQuests(
+      req.user.userId,
+    );
+
+    return ResponseDto.created<UserQuestEntity[]>(userQuests);
   }
 }

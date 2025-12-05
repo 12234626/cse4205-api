@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 
 import { UserQuestEntity } from './entities/user-quest.entity';
 import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
 import { UserService } from 'src/user/services/user.service';
 import { QuestService } from 'src/quest/quest.service';
 import { ResponseException } from 'src/common/exceptions/response.exception';
+import { QuestType } from 'src/quest/types/quest.type';
+import { QuestStatus } from './types/quest-status.type';
+import { QuestEntity } from 'src/quest/entities/quest.entity';
 
 @Injectable()
 export class UserQuestService {
@@ -76,5 +79,91 @@ export class UserQuestService {
     }
 
     await this.userQuestRepository.softRemove(userQuest);
+  }
+
+  async assignDailyQuests(userId: number): Promise<UserQuestEntity[]> {
+    return await this.userQuestRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const user = await this.userService.findOne(userId);
+
+        if (!user) {
+          throw ResponseException.userNotFound();
+        }
+
+        const now = new Date();
+        const today6AMKST = new Date(now);
+        today6AMKST.setUTCHours(21, 0, 0, 0);
+
+        if (now.getUTCHours() < 21) {
+          today6AMKST.setUTCDate(today6AMKST.getUTCDate() - 1);
+        }
+
+        const existingQuests = await transactionalEntityManager.find(
+          UserQuestEntity,
+          {
+            where: {
+              user: { userId },
+              createdAt: MoreThanOrEqual(today6AMKST),
+            },
+            relations: ['quest'],
+          },
+        );
+
+        if (existingQuests.length > 0) {
+          return existingQuests;
+        }
+
+        const allQuests = await this.questService.findAll();
+
+        const fixedQuests = allQuests.filter(
+          (quest) =>
+            quest.questType === QuestType.DAILY &&
+            (quest.title.includes('출석') || quest.title.includes('검증')),
+        );
+
+        const randomQuestPool = allQuests.filter(
+          (quest) =>
+            quest.questType === QuestType.DAILY &&
+            quest.levelRequired <= user.level &&
+            !quest.title.includes('출석') &&
+            !quest.title.includes('검증'),
+        );
+
+        if (fixedQuests.length < 2) {
+          throw ResponseException.questNotFound();
+        }
+
+        if (randomQuestPool.length < 2) {
+          throw ResponseException.questNotFound();
+        }
+
+        const randomQuests = this.getRandomQuests(randomQuestPool, 2);
+
+        const fixedQuestsToAssign = fixedQuests.slice(0, 2);
+        const allQuestsToAssign = [...fixedQuestsToAssign, ...randomQuests];
+
+        const assignedQuests = allQuestsToAssign.map((quest) =>
+          transactionalEntityManager.create(UserQuestEntity, {
+            user,
+            quest,
+            status: QuestStatus.PENDING,
+          }),
+        );
+
+        const savedQuests =
+          await transactionalEntityManager.save(assignedQuests);
+
+        return savedQuests;
+      },
+    );
+  }
+
+  private getRandomQuests(quests: QuestEntity[], count: number): QuestEntity[] {
+    const shuffled = [...quests];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, count);
   }
 }
