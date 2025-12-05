@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-  OneToMany,
 } from 'typeorm';
 import { IsEnum, IsOptional } from 'class-validator';
 

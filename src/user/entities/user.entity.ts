@@ -20,6 +20,7 @@ import {
 } from 'class-validator';
 
 import { UserQuestEntity } from 'src/user-quest/entities/user-quest.entity';
+import { TokenEntity } from 'src/auth/entities/token.entity';
 import { UserRewardEntity } from 'src/user-reward/entities/user-reward.entity';
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
@@ -99,22 +100,27 @@ export class UserEntity {
   @ManyToOne(() => UserEntity, (user) => user.mentees)
   mentor?: UserEntity | null;
 
+  @OneToMany(() => TokenEntity, (token: TokenEntity) => token.user, {
+    cascade: true,
+  })
+  tokens: TokenEntity[];
+
   @OneToMany(() => UserEntity, (user) => user.mentor, {
-    cascade: ['soft-remove'],
+    cascade: true,
   })
   mentees: UserEntity[];
 
   @OneToMany(
     () => UserQuestEntity,
     (userQuest: UserQuestEntity) => userQuest.user,
-    { cascade: ['soft-remove'] },
+    { cascade: true },
   )
   userQuests: UserQuestEntity[];
 
   @OneToMany(
     () => UserRewardEntity,
     (userReward: UserRewardEntity) => userReward.user,
-    { cascade: ['soft-remove'] },
+    { cascade: true },
   )
   userRewards: UserRewardEntity[];
 }
