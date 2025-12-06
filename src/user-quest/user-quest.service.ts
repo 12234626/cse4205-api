@@ -32,6 +32,15 @@ export class UserQuestService {
     return userQuest;
   }
 
+  async findOneWithQuest(id: number): Promise<UserQuestEntity | null> {
+    const userQuest = await this.userQuestRepository.findOne({
+      where: { userQuestId: id },
+      relations: ['quest'],
+    });
+
+    return userQuest;
+  }
+
   async create(
     createUserQuestDto: CreateUserQuestDto,
   ): Promise<UserQuestEntity> {

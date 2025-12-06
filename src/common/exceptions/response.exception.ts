@@ -79,4 +79,15 @@ export class ResponseException extends HttpException {
       message,
     );
   }
+
+  static consentRequestAlreadyExists(message?: string): ResponseException {
+    return new ResponseException(
+      ErrorCode.CONSENT_REQUEST_ALREADY_EXISTS,
+      message,
+    );
+  }
+
+  static consentRequestNotFound(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.CONSENT_REQUEST_NOT_FOUND, message);
+  }
 }

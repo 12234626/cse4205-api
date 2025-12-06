@@ -6,12 +6,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { IsEnum, IsOptional } from 'class-validator';
 
 import { UserEntity } from 'src/user/entities/user.entity';
 import { QuestEntity } from 'src/quest/entities/quest.entity';
 import { QuestStatus } from 'src/user-quest/types/quest-status.type';
+import { ConsentRequestEntity } from 'src/consent-request/entities/consent-request.entity';
 
 @Entity('user_quest')
 export class UserQuestEntity {
@@ -49,4 +51,15 @@ export class UserQuestEntity {
   @ApiProperty({ description: '퀘스트', type: () => QuestEntity })
   @ManyToOne(() => QuestEntity, (quest: QuestEntity) => quest.userQuests)
   quest: QuestEntity;
+
+  @ApiProperty({
+    description: '승인 요청들',
+    type: () => [ConsentRequestEntity],
+  })
+  @OneToMany(
+    () => ConsentRequestEntity,
+    (consentRequest) => consentRequest.userQuest,
+    { cascade: true },
+  )
+  consentRequests: ConsentRequestEntity[];
 }

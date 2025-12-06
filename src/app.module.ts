@@ -14,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { QuestModule } from './quest/quest.module';
 import { UserQuestModule } from './user-quest/user-quest.module';
+import { ConsentRequestModule } from './consent-request/consent-request.module';
+import { ConsentReviewModule } from './consent-review/consent-review.module';
 import { RewardModule } from './reward/reward.module';
 import { UserRewardModule } from './user-reward/user-reward.module';
 import { UploadModule } from './upload/upload.module';
@@ -41,6 +43,8 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     RewardModule,
     UserRewardModule,
     UploadModule,
+    ConsentRequestModule,
+    ConsentReviewModule,
   ],
   controllers: [AppController],
   providers: [
