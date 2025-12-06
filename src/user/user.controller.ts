@@ -121,7 +121,7 @@ export class UserController {
     );
   }
 
-  @Get('mentor-request/sent')
+  @Get('mentor-request/mentee')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTEE)
   @ApiBearerAuth()
@@ -138,7 +138,7 @@ export class UserController {
     return ResponseDto.ok<MentorRequestEntity[]>(requests);
   }
 
-  @Get('mentor-request/received')
+  @Get('mentor-request/mentor')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
