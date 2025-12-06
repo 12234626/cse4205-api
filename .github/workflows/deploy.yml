@@ -45,7 +45,7 @@ jobs:
               "docker stop api-server || true",
               "docker rm api-server || true",
               "docker pull '${{ secrets.ECR_URI }}':latest",
-              "docker run -d --name api-server -p 3000:3000 -e NODE_ENV=production -e DB_TYPE='${{ secrets.DB_TYPE }}' -e DB_HOST='${{ secrets.DB_HOST }}' -e DB_PORT='${{ secrets.DB_PORT }}' -e DB_USERNAME='${{ secrets.DB_USERNAME }}' -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' -e DB_DATABASE='${{ secrets.DB_DATABASE }}' -e DB_SSL_CERT_PATH='${{ secrets.DB_SSL_CERT_PATH }}' -e AWS_REGION='${{ secrets.AWS_REGION }}' -e AWS_S3_BUCKET_NAME='${{ secrets.AWS_S3_BUCKET_NAME }}' '${{ secrets.ECR_URI }}':latest"
+              "docker run -d --name api-server -p 3000:3000 -e NODE_ENV=production -e DB_TYPE='${{ secrets.DB_TYPE }}' -e DB_HOST='${{ secrets.DB_HOST }}' -e DB_PORT='${{ secrets.DB_PORT }}' -e DB_USERNAME='${{ secrets.DB_USERNAME }}' -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' -e DB_DATABASE='${{ secrets.DB_DATABASE }}' -e DB_SSL_CERT_PATH='${{ secrets.DB_SSL_CERT_PATH }}' -e JWT_SECRET_ACCESS='${{ secrets.JWT_SECRET_ACCESS }}' -e JWT_SECRET_REFRESH='${{ secrets.JWT_SECRET_REFRESH }}' -e AWS_REGION='${{ secrets.AWS_REGION }}' -e AWS_S3_BUCKET_NAME='${{ secrets.AWS_S3_BUCKET_NAME }}' '${{ secrets.ECR_URI }}':latest"
             ]' \
             --comment "Deploy API Server" \
             --query "Command.CommandId" \
