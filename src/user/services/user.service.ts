@@ -134,6 +134,12 @@ export class UserService {
   }
 
   async softRemove(user: UserEntity): Promise<void> {
+    const mentees = this.mentorRequestService.findByMentor(user);
+
+    Promise.all(mentees.map(async (mentee) => {
+      this.mentorRequestService.setMentorNull(mentee);
+    }));
+    
     await this.userRepository.softRemove(user);
   }
 }
