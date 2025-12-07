@@ -37,8 +37,8 @@ export class ResponseException extends HttpException {
     return new ResponseException(ErrorCode.USER_ALREADY_EXISTS, message);
   }
 
-  static invalidRole(message?: string): ResponseException {
-    return new ResponseException(ErrorCode.INVALID_ROLE, message);
+  static invalidUserRole(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.INVALID_USER_ROLE, message);
   }
 
   static invalidProvider(message?: string): ResponseException {

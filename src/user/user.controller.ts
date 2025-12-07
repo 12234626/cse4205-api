@@ -22,10 +22,10 @@ import { UserService } from './services/user.service';
 import { MentorRequestService } from './services/mentor-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRoles } from 'src/auth/decorators/role.decorator';
-import { UserDto } from './dtos/user.dto';
-import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
 import { UserEntity } from './entities/user.entity';
 import { MentorRequestEntity } from './entities/mentor-request.entity';
+import { UserDto } from './dtos/user.dto';
+import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { UserRole } from './types/user-role.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
@@ -89,6 +89,10 @@ export class UserController {
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
+  @ApiResponse({
     status: 404,
     description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
   })
@@ -113,6 +117,10 @@ export class UserController {
     type: [UserDto],
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   async getMyMentees(@Req() req: Request) {
     const mentees = await this.userService.findMentees(req.user);
 
@@ -132,6 +140,10 @@ export class UserController {
     type: [MentorRequestEntity],
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   async getMySentRequests(@Req() req: Request) {
     const requests = await this.mentorRequestService.findByMentee(req.user);
 
@@ -149,27 +161,43 @@ export class UserController {
     type: [MentorRequestEntity],
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   async getMyReceivedRequests(@Req() req: Request) {
     const requests = await this.mentorRequestService.findByMentor(req.user);
 
     return ResponseDto.ok<MentorRequestEntity[]>(requests);
   }
 
-  @Post('mentor-request')
+  @Post('mentor-request/:userRole')
   @UseGuards(JwtAccessAuthGuard)
-  @UserRoles(UserRole.MENTEE)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '멘토 요청 보내기' })
+  @ApiOperation({
+    summary: '멘토-멘티 관계 요청 보내기',
+    description:
+      'MENTEE 역할: 멘토에게 요청 보내기, MENTOR 역할: 멘티에게 요청 보내기',
+  })
+  @ApiParam({
+    name: 'userRole',
+    description: '요청자 역할',
+    enum: UserRole,
+  })
   @ApiResponse({
     status: 201,
-    description: '멘토 요청 생성 성공',
+    description: '관계 요청 생성 성공',
     type: MentorRequestEntity,
   })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
+  @ApiResponse({
     status: 404,
-    description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
+    description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
   })
   @ApiResponse({
     status: 409,
@@ -177,22 +205,28 @@ export class UserController {
   })
   async createMentorRequest(
     @Req() req: Request,
+    @Param('userRole') userRole: UserRole,
     @Body() createMentorRequestDto: CreateMentorRequestDto,
   ) {
     const request = await this.mentorRequestService.create(
+      userRole,
       req.user,
-      createMentorRequestDto,
+      createMentorRequestDto.username,
     );
 
     return ResponseDto.created<MentorRequestEntity>(request);
   }
 
-  @Put('mentor-request/:requestId/accept')
+  @Put('mentor-request/accept/:userRole/:mentorRequestId')
   @UseGuards(JwtAccessAuthGuard)
-  @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '멘토 요청 수락' })
-  @ApiParam({ name: 'requestId', description: '멘토 요청 ID' })
+  @ApiOperation({ summary: '멘토-멘티 관계 요청 수락' })
+  @ApiParam({
+    name: 'userRole',
+    description: '수락자 역할',
+    enum: UserRole,
+  })
+  @ApiParam({ name: 'mentorRequestId', description: '멘토 요청 ID' })
   @ApiResponse({
     status: 200,
     description: '요청 수락 성공',
@@ -203,26 +237,38 @@ export class UserController {
     description: '잘못된 요청 상태 (INVALID_MENTOR_REQUEST)',
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   @ApiResponse({
     status: 404,
     description: '요청을 찾을 수 없음 (MENTOR_REQUEST_NOT_FOUND)',
   })
   async acceptMentorRequest(
     @Req() req: Request,
-    @Param('requestId') requestId: number,
+    @Param('userRole') userRole: UserRole,
+    @Param('mentorRequestId') mentorRequestId: number,
   ) {
-    const request = await this.mentorRequestService.accept(req.user, requestId);
+    const request = await this.mentorRequestService.accept(
+      userRole,
+      req.user,
+      mentorRequestId,
+    );
 
     return ResponseDto.ok<MentorRequestEntity>(request);
   }
 
-  @Put('mentor-request/:requestId/reject')
+  @Put('mentor-request/reject/:userRole/:mentorRequestId')
   @UseGuards(JwtAccessAuthGuard)
-  @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '멘토 요청 거절' })
-  @ApiParam({ name: 'requestId', description: '멘토 요청 ID' })
+  @ApiOperation({ summary: '멘토-멘티 관계 요청 거절' })
+  @ApiParam({
+    name: 'userRole',
+    description: '거절자 역할',
+    enum: UserRole,
+  })
+  @ApiParam({ name: 'mentorRequestId', description: '멘토 요청 ID' })
   @ApiResponse({
     status: 200,
     description: '요청 거절 성공',
@@ -233,16 +279,24 @@ export class UserController {
     description: '잘못된 요청 상태 (INVALID_MENTOR_REQUEST)',
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   @ApiResponse({
     status: 404,
     description: '요청을 찾을 수 없음 (MENTOR_REQUEST_NOT_FOUND)',
   })
   async rejectMentorRequest(
     @Req() req: Request,
-    @Param('requestId') requestId: number,
+    @Param('userRole') userRole: UserRole,
+    @Param('mentorRequestId') mentorRequestId: number,
   ) {
-    const request = await this.mentorRequestService.reject(req.user, requestId);
+    const request = await this.mentorRequestService.reject(
+      userRole,
+      req.user,
+      mentorRequestId,
+    );
 
     return ResponseDto.ok<MentorRequestEntity>(request);
   }
@@ -271,6 +325,10 @@ export class UserController {
   @ApiResponse({ status: 204, description: '멘토 제거 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
+  @ApiResponse({
     status: 404,
     description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
   })
@@ -287,6 +345,10 @@ export class UserController {
   @ApiOperation({ summary: '내 멘티 전체 제거' })
   @ApiResponse({ status: 204, description: '멘티 전체 제거 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   async removeMyMentees(@Req() req: Request) {
     await this.userService.removeMentees(req.user);
 
@@ -301,7 +363,10 @@ export class UserController {
   @ApiParam({ name: 'menteeId', description: '멘티 ID' })
   @ApiResponse({ status: 204, description: '멘티 제거 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({
+    status: 403,
+    description: '권한 없음 (FORBIDDEN)',
+  })
   @ApiResponse({
     status: 404,
     description: '멘티를 찾을 수 없음 (USER_NOT_FOUND)',

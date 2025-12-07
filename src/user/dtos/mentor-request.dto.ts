@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateMentorRequestDto {
-  @ApiProperty({ description: '멘토 ID' })
-  @IsInt()
-  mentorId: number;
+  @ApiProperty({ description: '사용자 이름' })
+  @IsString()
+  username: string;
 }

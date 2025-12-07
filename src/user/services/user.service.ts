@@ -78,13 +78,7 @@ export class UserService {
     });
 
     if (mentorUsername) {
-      const mentor = await this.findByUsername(mentorUsername);
-
-      if (mentor) {
-        await this.mentorRequestService.create(user, {
-          mentorId: mentor.userId,
-        });
-      }
+      await this.mentorRequestService.create(user.role, user, mentorUsername);
     }
 
     return this.userRepository.save(user);
