@@ -23,9 +23,9 @@ import { MentorRequestService } from './services/mentor-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRoles } from 'src/auth/decorators/role.decorator';
 import { UserEntity } from './entities/user.entity';
-import { MentorRequestEntity } from './entities/mentor-request.entity';
 import { UserDto } from './dtos/user.dto';
-import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
+import { MentorRequestDto } from './dtos/mentor-request.dto';
+import { CreateMentorRequestDto } from './dtos/create-mentor-request.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { UserRole } from './types/user-role.type';
 import { RequestStatus } from './types/request-status.type';
@@ -138,7 +138,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '보낸 요청 조회 성공',
-    type: [MentorRequestEntity],
+    type: [MentorRequestDto],
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
@@ -148,7 +148,9 @@ export class UserController {
   async getMySentRequests(@Req() req: Request) {
     const requests = await this.mentorRequestService.findByMentee(req.user);
 
-    return ResponseDto.ok<MentorRequestEntity[]>(requests);
+    return ResponseDto.ok<MentorRequestDto[]>(
+      requests.map((request) => new MentorRequestDto(request)),
+    );
   }
 
   @Get('mentor-request/mentor')
@@ -159,7 +161,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '받은 요청 조회 성공',
-    type: [MentorRequestEntity],
+    type: [MentorRequestDto],
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
@@ -169,7 +171,9 @@ export class UserController {
   async getMyReceivedRequests(@Req() req: Request) {
     const requests = await this.mentorRequestService.findByMentor(req.user);
 
-    return ResponseDto.ok<MentorRequestEntity[]>(requests);
+    return ResponseDto.ok<MentorRequestDto[]>(
+      requests.map((request) => new MentorRequestDto(request)),
+    );
   }
 
   @Post('mentor-request')
@@ -179,7 +183,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: '관계 요청 생성 성공',
-    type: MentorRequestEntity,
+    type: MentorRequestDto,
   })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
@@ -200,7 +204,9 @@ export class UserController {
       createMentorRequestDto.otherUsername,
     );
 
-    return ResponseDto.created<MentorRequestEntity>(mentorRequest);
+    return ResponseDto.created<MentorRequestDto>(
+      new MentorRequestDto(mentorRequest),
+    );
   }
 
   @Put('mentor-request/accept/:mentorRequestId')
@@ -211,7 +217,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '요청 수락 성공',
-    type: MentorRequestEntity,
+    type: MentorRequestDto,
   })
   @ApiResponse({
     status: 400,
@@ -236,7 +242,9 @@ export class UserController {
       RequestStatus.ACCEPTED,
     );
 
-    return ResponseDto.ok<MentorRequestEntity>(mentorRequest);
+    return ResponseDto.ok<MentorRequestDto>(
+      new MentorRequestDto(mentorRequest),
+    );
   }
 
   @Put('mentor-request/reject/:mentorRequestId')
@@ -247,7 +255,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '요청 거절 성공',
-    type: MentorRequestEntity,
+    type: MentorRequestDto,
   })
   @ApiResponse({
     status: 400,
@@ -272,7 +280,9 @@ export class UserController {
       RequestStatus.REJECTED,
     );
 
-    return ResponseDto.ok<MentorRequestEntity>(mentorRequest);
+    return ResponseDto.ok<MentorRequestDto>(
+      new MentorRequestDto(mentorRequest),
+    );
   }
 
   @Delete()
