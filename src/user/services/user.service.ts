@@ -137,7 +137,8 @@ export class UserService {
     const mentees = this.mentorRequestService.findByMentor(user);
 
     Promise.all(mentees.map(async (mentee) => {
-      this.mentorRequestService.setMentorNull(mentee);
+      mentee.mentor = null;
+      await this.userRepository.save(mentee);
     }));
     
     await this.userRepository.softRemove(user);
