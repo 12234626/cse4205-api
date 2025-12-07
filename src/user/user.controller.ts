@@ -247,7 +247,7 @@ export class UserController {
     return ResponseDto.ok<MentorRequestEntity>(request);
   }
 
-  @Delete(':userId')
+  @Delete()
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 삭제' })
@@ -258,15 +258,8 @@ export class UserController {
     status: 404,
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
   })
-  async softRemove(@Req() req: Request, @Param('userId') userId: number) {
-    if (!req.user) {
-      throw ResponseException.userNotFound();
-    }
-    if (req.user.userId !== userId) {
-      throw ResponseException.forbidden();
-    }
-
-    await this.userService.softRemove(userId);
+  async softRemove(@Req() req: Request) {
+    await this.userService.softRemove(req.user);
 
     return ResponseDto.noContent();
   }

@@ -138,13 +138,7 @@ export class UserService {
     await this.userRepository.save(mentee);
   }
 
-  async softRemove(id: number): Promise<void> {
-    const user = await this.findOne(id);
-
-    if (!user) {
-      throw ResponseException.userNotFound();
-    }
-
+  async softRemove(user: UserEntity): Promise<void> {
     await this.userRepository.softRemove(user);
   }
 }
