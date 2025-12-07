@@ -123,6 +123,7 @@ export class UserService {
   async removeMentee(mentor: UserEntity, menteeId: number): Promise<void> {
     const mentee = await this.userRepository.findOne({
       where: { userId: menteeId },
+      relations: ['mentor'],
     });
 
     if (!mentee || !mentee.mentor) {
