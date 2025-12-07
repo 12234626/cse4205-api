@@ -57,6 +57,7 @@ export class UserService {
   async findMentees(user: UserEntity): Promise<UserEntity[]> {
     const mentees = await this.userRepository.find({
       where: { mentor: { userId: user.userId } },
+      relations: ['mentor'],
     });
 
     return mentees;
