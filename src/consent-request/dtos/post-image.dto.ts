@@ -15,7 +15,7 @@ export class PostImageDto {
   createdAt: Date;
 
   @ApiPropertyOptional({ description: '삭제일' })
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   constructor(consentRequestImage: ConsentRequestImageEntity) {
     this.consentRequestImageId = consentRequestImage.consentRequestImageId;

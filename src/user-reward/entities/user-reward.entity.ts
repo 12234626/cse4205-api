@@ -24,7 +24,7 @@ export class UserRewardEntity {
   @ApiPropertyOptional({ description: '삭제일' })
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   @IsOptional()
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ApiProperty({ description: '사용자', type: () => UserEntity })
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.userRewards)

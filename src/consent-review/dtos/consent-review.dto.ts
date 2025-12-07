@@ -11,13 +11,13 @@ export class ConsentReviewDto {
   @ApiPropertyOptional({ description: '댓글' })
   @IsString()
   @IsOptional()
-  comment?: string;
+  comment: string | null;
 
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
 
   @ApiPropertyOptional({ description: '삭제일' })
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ApiProperty({ description: '리뷰어', type: () => UserDto })
   reviewer: UserDto;

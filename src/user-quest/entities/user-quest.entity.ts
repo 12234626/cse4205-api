@@ -33,7 +33,7 @@ export class UserQuestEntity {
   @ApiPropertyOptional({ description: '퀘스트 완료 시간' })
   @Column({ type: 'timestamp', nullable: true })
   @IsOptional()
-  completedAt?: Date;
+  completedAt: Date | null;
 
   @ApiProperty({ description: '생성일' })
   @CreateDateColumn({ type: 'timestamp' })
@@ -42,7 +42,7 @@ export class UserQuestEntity {
   @ApiPropertyOptional({ description: '삭제일' })
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   @IsOptional()
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ApiProperty({ description: '사용자', type: () => UserEntity })
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.userQuests)

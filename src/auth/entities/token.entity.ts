@@ -1,10 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   ManyToOne,
+  DeleteDateColumn,
 } from 'typeorm';
 
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -26,6 +27,10 @@ export class TokenEntity {
   @ApiProperty({ description: '생성일' })
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  @ApiPropertyOptional({ description: '삭제일' })
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date | null;
 
   @ApiProperty({ description: '사용자', type: () => UserEntity })
   @ManyToOne(() => UserEntity)

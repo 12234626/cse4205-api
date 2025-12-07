@@ -22,7 +22,7 @@ export class ConsentReviewEntity {
   @Column({ type: 'text', nullable: true })
   @IsString()
   @IsOptional()
-  comment?: string;
+  comment: string | null;
 
   @ApiProperty({ description: '생성일' })
   @CreateDateColumn({ type: 'timestamp' })
@@ -30,7 +30,7 @@ export class ConsentReviewEntity {
 
   @ApiPropertyOptional({ description: '삭제일' })
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ApiProperty({ description: '리뷰어', type: () => UserEntity })
   @ManyToOne(() => UserEntity)

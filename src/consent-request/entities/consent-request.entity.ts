@@ -30,12 +30,12 @@ export class ConsentRequestEntity {
   @Column({ type: 'varchar', length: 200, nullable: true })
   @IsString()
   @IsOptional()
-  title?: string;
+  title: string | null;
 
   @Column({ type: 'text', nullable: true })
   @IsString()
   @IsOptional()
-  content?: string;
+  content: string | null;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -44,7 +44,7 @@ export class ConsentRequestEntity {
   updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ManyToOne(() => UserEntity)
   author: UserEntity;

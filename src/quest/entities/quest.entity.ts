@@ -62,7 +62,7 @@ export class QuestEntity {
   @ApiPropertyOptional({ description: '삭제일' })
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   @IsOptional()
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @OneToMany(
     () => UserQuestEntity,

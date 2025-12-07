@@ -23,7 +23,7 @@ export class ConsentRequestImageEntity {
   createdAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ManyToOne(
     () => ConsentRequestEntity,

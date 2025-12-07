@@ -21,12 +21,12 @@ export class PostDto {
   @ApiPropertyOptional({ description: '제목' })
   @IsString()
   @IsOptional()
-  title?: string;
+  title: string | null;
 
   @ApiPropertyOptional({ description: '본문' })
   @IsString()
   @IsOptional()
-  content?: string;
+  content: string | null;
 
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
@@ -35,7 +35,7 @@ export class PostDto {
   updatedAt: Date;
 
   @ApiPropertyOptional({ description: '삭제일' })
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   @ApiProperty({ description: '작성자', type: () => UserDto })
   author: UserDto;

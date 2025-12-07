@@ -58,7 +58,7 @@ export class UserEntity {
   @IsInt()
   @Min(0)
   @IsOptional()
-  age?: number;
+  age: number | null;
 
   @ApiProperty({ description: '레벨', default: 1 })
   @Column({ type: 'int', default: 1 })
@@ -82,7 +82,7 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   @IsUrl()
   @IsOptional()
-  avatarUrl?: string;
+  avatarUrl: string | null;
 
   @ApiProperty({ description: '생성일' })
   @CreateDateColumn({ type: 'timestamp' })
@@ -94,16 +94,16 @@ export class UserEntity {
 
   @ApiPropertyOptional({ description: '삭제일' })
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt?: Date;
-
-  @ApiPropertyOptional({ description: '멘토', type: () => UserEntity })
-  @ManyToOne(() => UserEntity, (user) => user.mentees)
-  mentor?: UserEntity | null;
+  deletedAt: Date | null;
 
   @OneToMany(() => TokenEntity, (token: TokenEntity) => token.user, {
     cascade: true,
   })
   tokens: TokenEntity[];
+
+  @ApiPropertyOptional({ description: '멘토', type: () => UserEntity })
+  @ManyToOne(() => UserEntity, (user) => user.mentees)
+  mentor: UserEntity | null;
 
   @OneToMany(() => UserEntity, (user) => user.mentor, {
     cascade: true,
