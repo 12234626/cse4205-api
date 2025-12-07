@@ -18,6 +18,13 @@ export class MentorRequestService {
     private readonly userService: UserService,
   ) {}
 
+  async findOne(mentorRequestId: number): Promise<MentorRequestEntity | null> {
+    return this.mentorRequestRepository.findOne({
+      where: { mentorRequestId },
+      relations: ['mentor', 'mentee'],
+    });
+  }
+
   async findByMentee(mentee: UserEntity): Promise<MentorRequestEntity[]> {
     return this.mentorRequestRepository.find({
       where: { mentee },
@@ -33,23 +40,18 @@ export class MentorRequestService {
   }
 
   async create(
-    userRole: UserRole,
     user: UserEntity,
-    username: string,
+    otherUsername: string,
   ): Promise<MentorRequestEntity> {
     let mentor: UserEntity | null;
     let mentee: UserEntity | null;
 
-    if (user.role !== userRole) {
-      throw ResponseException.invalidUserRole();
-    }
-
-    if (userRole === UserRole.MENTEE) {
-      mentor = await this.userService.findByUsername(username);
+    if (user.role === UserRole.MENTEE) {
+      mentor = await this.userService.findByUsername(otherUsername);
       mentee = user;
     } else {
       mentor = user;
-      mentee = await this.userService.findByUsername(username);
+      mentee = await this.userService.findByUsername(otherUsername);
     }
 
     if (!mentor || !mentee) {
@@ -78,15 +80,11 @@ export class MentorRequestService {
   }
 
   async updateStatus(
-    userRole: UserRole,
     user: UserEntity,
     mentorRequestId: number,
     status: RequestStatus.ACCEPTED | RequestStatus.REJECTED,
   ): Promise<MentorRequestEntity> {
-    const mentorRequest = await this.mentorRequestRepository.findOne({
-      where: { mentorRequestId },
-      relations: ['mentor', 'mentee'],
-    });
+    const mentorRequest = await this.findOne(mentorRequestId);
 
     if (!mentorRequest) {
       throw ResponseException.mentorRequestNotFound();
@@ -95,16 +93,12 @@ export class MentorRequestService {
     const mentor = mentorRequest.mentor;
     const mentee = mentorRequest.mentee;
 
-    if (user.role !== userRole) {
-      throw ResponseException.invalidUserRole();
-    }
-
-    if (userRole === UserRole.MENTOR) {
-      if (mentor.userId !== user.userId) {
+    if (user.role === UserRole.MENTEE) {
+      if (mentee.userId !== user.userId) {
         throw ResponseException.forbidden();
       }
-    } else if (userRole === UserRole.MENTEE) {
-      if (mentee.userId !== user.userId) {
+    } else {
+      if (mentor.userId !== user.userId) {
         throw ResponseException.forbidden();
       }
     }
@@ -136,31 +130,5 @@ export class MentorRequestService {
     }
 
     return this.mentorRequestRepository.save(mentorRequest);
-  }
-
-  async accept(
-    userRole: UserRole,
-    user: UserEntity,
-    mentorRequestId: number,
-  ): Promise<MentorRequestEntity> {
-    return this.updateStatus(
-      userRole,
-      user,
-      mentorRequestId,
-      RequestStatus.ACCEPTED,
-    );
-  }
-
-  async reject(
-    userRole: UserRole,
-    user: UserEntity,
-    mentorRequestId: number,
-  ): Promise<MentorRequestEntity> {
-    return this.updateStatus(
-      userRole,
-      user,
-      mentorRequestId,
-      RequestStatus.REJECTED,
-    );
   }
 }

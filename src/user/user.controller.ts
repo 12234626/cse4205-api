@@ -28,6 +28,7 @@ import { UserDto } from './dtos/user.dto';
 import { CreateMentorRequestDto } from './dtos/mentor-request.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { UserRole } from './types/user-role.type';
+import { RequestStatus } from './types/request-status.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @ApiTags('사용자')
@@ -171,19 +172,10 @@ export class UserController {
     return ResponseDto.ok<MentorRequestEntity[]>(requests);
   }
 
-  @Post('mentor-request/:userRole')
+  @Post('mentor-request')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({
-    summary: '멘토-멘티 관계 요청 보내기',
-    description:
-      'MENTEE 역할: 멘토에게 요청 보내기, MENTOR 역할: 멘티에게 요청 보내기',
-  })
-  @ApiParam({
-    name: 'userRole',
-    description: '요청자 역할',
-    enum: UserRole,
-  })
+  @ApiOperation({ summary: '멘토-멘티 관계 요청 보내기' })
   @ApiResponse({
     status: 201,
     description: '관계 요청 생성 성공',
@@ -191,10 +183,6 @@ export class UserController {
   })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  @ApiResponse({
-    status: 403,
-    description: '권한 없음 (FORBIDDEN)',
-  })
   @ApiResponse({
     status: 404,
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
@@ -205,27 +193,20 @@ export class UserController {
   })
   async createMentorRequest(
     @Req() req: Request,
-    @Param('userRole') userRole: UserRole,
     @Body() createMentorRequestDto: CreateMentorRequestDto,
   ) {
-    const request = await this.mentorRequestService.create(
-      userRole,
+    const mentorRequest = await this.mentorRequestService.create(
       req.user,
-      createMentorRequestDto.username,
+      createMentorRequestDto.otherUsername,
     );
 
-    return ResponseDto.created<MentorRequestEntity>(request);
+    return ResponseDto.created<MentorRequestEntity>(mentorRequest);
   }
 
-  @Put('mentor-request/accept/:userRole/:mentorRequestId')
+  @Put('mentor-request/accept/:mentorRequestId')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '멘토-멘티 관계 요청 수락' })
-  @ApiParam({
-    name: 'userRole',
-    description: '수락자 역할',
-    enum: UserRole,
-  })
   @ApiParam({ name: 'mentorRequestId', description: '멘토 요청 ID' })
   @ApiResponse({
     status: 200,
@@ -247,27 +228,21 @@ export class UserController {
   })
   async acceptMentorRequest(
     @Req() req: Request,
-    @Param('userRole') userRole: UserRole,
     @Param('mentorRequestId') mentorRequestId: number,
   ) {
-    const request = await this.mentorRequestService.accept(
-      userRole,
+    const mentorRequest = await this.mentorRequestService.updateStatus(
       req.user,
       mentorRequestId,
+      RequestStatus.ACCEPTED,
     );
 
-    return ResponseDto.ok<MentorRequestEntity>(request);
+    return ResponseDto.ok<MentorRequestEntity>(mentorRequest);
   }
 
-  @Put('mentor-request/reject/:userRole/:mentorRequestId')
+  @Put('mentor-request/reject/:mentorRequestId')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '멘토-멘티 관계 요청 거절' })
-  @ApiParam({
-    name: 'userRole',
-    description: '거절자 역할',
-    enum: UserRole,
-  })
   @ApiParam({ name: 'mentorRequestId', description: '멘토 요청 ID' })
   @ApiResponse({
     status: 200,
@@ -289,25 +264,23 @@ export class UserController {
   })
   async rejectMentorRequest(
     @Req() req: Request,
-    @Param('userRole') userRole: UserRole,
     @Param('mentorRequestId') mentorRequestId: number,
   ) {
-    const request = await this.mentorRequestService.reject(
-      userRole,
+    const mentorRequest = await this.mentorRequestService.updateStatus(
       req.user,
       mentorRequestId,
+      RequestStatus.REJECTED,
     );
 
-    return ResponseDto.ok<MentorRequestEntity>(request);
+    return ResponseDto.ok<MentorRequestEntity>(mentorRequest);
   }
 
   @Delete()
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 삭제' })
-  @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({ status: 204, description: '사용자 삭제 성공' })
-  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
     status: 404,
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
