@@ -27,14 +27,14 @@ export class MentorRequestService {
 
   async findByMentee(mentee: UserEntity): Promise<MentorRequestEntity[]> {
     return this.mentorRequestRepository.find({
-      where: { mentee },
+      where: { mentee: { userId: mentee.userId } },
       relations: ['mentor', 'mentee'],
     });
   }
 
   async findByMentor(mentor: UserEntity): Promise<MentorRequestEntity[]> {
     return this.mentorRequestRepository.find({
-      where: { mentor },
+      where: { mentor: { userId: mentor.userId } },
       relations: ['mentor', 'mentee'],
     });
   }
@@ -114,7 +114,7 @@ export class MentorRequestService {
 
       const pendingMentorRequests = await this.mentorRequestRepository.find({
         where: {
-          mentee,
+          mentee: { userId: mentee.userId },
           status: RequestStatus.PENDING,
         },
       });
