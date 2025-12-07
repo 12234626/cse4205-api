@@ -266,7 +266,7 @@ export class UserController {
 
   @Delete('mentor')
   @UseGuards(JwtAccessAuthGuard)
-  @UserRoles(UserRole.MENTOR)
+  @UserRoles(UserRole.MENTEE)
   @ApiOperation({ summary: '내 멘토 제거' })
   @ApiResponse({ status: 204, description: '멘토 제거 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
