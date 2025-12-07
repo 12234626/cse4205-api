@@ -17,11 +17,11 @@ export class UserService {
   ) {}
 
   async findAll(): Promise<UserEntity[]> {
-    return this.userRepository.find();
+    return this.userRepository.find({ relations: ['mentor'] });
   }
 
   async findOne(id: number): Promise<UserEntity | null> {
-    const user = await this.userRepository.findOne({ where: { userId: id } });
+    const user = await this.userRepository.findOne({ where: { userId: id }, relations: ['mentor'] });
 
     return user;
   }
