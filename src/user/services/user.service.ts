@@ -78,7 +78,7 @@ export class UserService {
     });
 
     if (mentorUsername) {
-      await this.mentorRequestService.create(user.role, user, mentorUsername);
+      await this.mentorRequestService.create(user, mentorUsername);
     }
 
     return this.userRepository.save(user);

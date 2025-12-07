@@ -62,7 +62,7 @@ async function canActivate(
   }
 
   if (!roles.includes(user.role)) {
-    throw ResponseException.invalidRole();
+    throw ResponseException.invalidUserRole();
   }
 
   return true;
