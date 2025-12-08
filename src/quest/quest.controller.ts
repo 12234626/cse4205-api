@@ -16,22 +16,24 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Like } from 'typeorm';
 
 import { QuestService } from './quest.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
-import { QuestEntity } from './entities/quest.entity';
-import { CreateQuestDto, UpdateQuestDto } from './dtos/quest.dto';
+import { QuestDto } from './dtos/quest.dto';
+import { CreateQuestDto } from './dtos/create-quest.dto';
+import { UpdateQuestDto } from './dtos/update-quest.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
-@ApiBearerAuth()
 @ApiTags('퀘스트')
 @Controller('quest')
-@UseGuards(JwtAccessAuthGuard)
 export class QuestController {
   constructor(private readonly questService: QuestService) {}
 
   @Get()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '전체 퀘스트 조회 또는 제목/카테고리로 검색' })
   @ApiQuery({
     name: 'title',
@@ -46,94 +48,104 @@ export class QuestController {
   @ApiResponse({
     status: 200,
     description: '퀘스트 조회 성공',
-    type: [QuestEntity],
+    type: [QuestDto],
   })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   async findAll(
     @Query('title') title?: string,
     @Query('category') category?: string,
   ) {
-    if (title) {
-      const quests = await this.questService.findByTitle(title);
+    const quests = await this.questService.findAll({
+      where: {
+        title: title ? Like(`%${title}%`) : undefined,
+        category: category ? category : undefined,
+      },
+    });
 
-      return ResponseDto.ok<QuestEntity[]>(quests);
-    }
-
-    if (category) {
-      const quests = await this.questService.findByCategory(category);
-
-      return ResponseDto.ok<QuestEntity[]>(quests);
-    }
-
-    const quests = await this.questService.findAll();
-
-    return ResponseDto.ok<QuestEntity[]>(quests);
+    return ResponseDto.ok<QuestDto[]>(
+      quests.map((quest) => new QuestDto(quest)),
+    );
   }
 
-  @Get(':id')
+  @Get(':questId')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'ID로 퀘스트 조회' })
   @ApiResponse({
     status: 200,
     description: '퀘스트 조회 성공',
-    type: QuestEntity,
+    type: QuestDto,
   })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
     status: 404,
     description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
   })
-  async findOne(@Param('id') id: number) {
-    const quest = await this.questService.findOne(id);
+  async findOne(@Param('questId') questId: number) {
+    const quest = await this.questService.findOne({
+      where: { questId },
+    });
 
     if (!quest) {
       throw ResponseException.questNotFound();
     }
 
-    return ResponseDto.ok<QuestEntity>(quest);
+    return ResponseDto.ok<QuestDto>(new QuestDto(quest));
   }
 
   @Post()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '새 퀘스트 생성' })
   @ApiResponse({
     status: 201,
     description: '퀘스트 생성 성공',
-    type: QuestEntity,
+    type: QuestDto,
   })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   async create(@Body() createQuestDto: CreateQuestDto) {
     const quest = await this.questService.create(createQuestDto);
 
-    return ResponseDto.created<QuestEntity>(quest);
+    return ResponseDto.created<QuestDto>(new QuestDto(quest));
   }
 
-  @Put(':id')
+  @Put(':questId')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '퀘스트 수정' })
   @ApiResponse({
     status: 200,
     description: '퀘스트 수정 성공',
-    type: QuestEntity,
+    type: QuestDto,
   })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
     status: 404,
     description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
   })
   async update(
-    @Param('id') id: number,
+    @Param('questId') questId: number,
     @Body() updateQuestDto: UpdateQuestDto,
   ) {
-    const quest = await this.questService.update(id, updateQuestDto);
+    const quest = await this.questService.update(questId, updateQuestDto);
 
-    return ResponseDto.ok<QuestEntity>(quest);
+    return ResponseDto.ok<QuestDto>(new QuestDto(quest));
   }
 
-  @Delete(':id')
+  @Delete(':questId')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '퀘스트 삭제' })
   @ApiResponse({ status: 204, description: '퀘스트 삭제 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
     status: 404,
     description: '퀘스트를 찾을 수 없음 (QUEST_NOT_FOUND)',
   })
-  async softRemove(@Param('id') id: number) {
-    await this.questService.softRemove(id);
+  async softRemove(@Param('questId') questId: number) {
+    await this.questService.softRemove(questId);
 
     return ResponseDto.noContent();
   }

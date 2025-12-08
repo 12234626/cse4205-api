@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOneOptions, FindManyOptions } from 'typeorm';
 
 import { UserRewardEntity } from './entities/user-reward.entity';
-import { CreateUserRewardDto } from './dtos/user-reward.dto';
+import { CreateUserRewardDto } from './dtos/create-user-reward.dto';
 import { UserService } from 'src/user/services/user.service';
 import { RewardService } from 'src/reward/reward.service';
 import { ResponseException } from 'src/common/exceptions/response.exception';
@@ -17,30 +17,32 @@ export class UserRewardService {
     private readonly rewardService: RewardService,
   ) {}
 
-  async findAll(): Promise<UserRewardEntity[]> {
-    return this.userRewardRepository.find();
+  async findAll(
+    options?: FindManyOptions<UserRewardEntity>,
+  ): Promise<UserRewardEntity[]> {
+    return this.userRewardRepository.find(options);
   }
 
-  async findOne(id: number): Promise<UserRewardEntity | null> {
-    const userReward = await this.userRewardRepository.findOne({
-      where: { userRewardId: id },
-    });
-
-    return userReward;
+  async findOne(
+    options: FindOneOptions<UserRewardEntity>,
+  ): Promise<UserRewardEntity | null> {
+    return this.userRewardRepository.findOne(options);
   }
 
   async create(
     createUserRewardDto: CreateUserRewardDto,
   ): Promise<UserRewardEntity> {
-    const user = await this.userService.findOne(createUserRewardDto.userId);
+    const user = await this.userService.findOne({
+      where: { userId: createUserRewardDto.userId },
+    });
 
     if (!user) {
       throw ResponseException.userNotFound();
     }
 
-    const reward = await this.rewardService.findOne(
-      createUserRewardDto.rewardId,
-    );
+    const reward = await this.rewardService.findOne({
+      where: { rewardId: createUserRewardDto.rewardId },
+    });
 
     if (!reward) {
       throw ResponseException.rewardNotFound();
@@ -54,8 +56,10 @@ export class UserRewardService {
     return this.userRewardRepository.save(userReward);
   }
 
-  async softRemove(id: number): Promise<void> {
-    const userReward = await this.findOne(id);
+  async softRemove(userRewardId: number): Promise<void> {
+    const userReward = await this.findOne({
+      where: { userRewardId },
+    });
 
     if (!userReward) {
       throw ResponseException.userRewardNotFound();

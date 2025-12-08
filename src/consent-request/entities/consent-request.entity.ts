@@ -55,14 +55,14 @@ export class ConsentRequestEntity {
   @OneToMany(
     () => ConsentRequestImageEntity,
     (consentRequestImage) => consentRequestImage.consentRequest,
-    { cascade: true },
+    { cascade: ['soft-remove'] },
   )
   images: ConsentRequestImageEntity[];
 
   @OneToMany(
     () => ConsentReviewEntity,
     (consentReview) => consentReview.consentRequest,
-    { cascade: true },
+    { cascade: ['soft-remove'] },
   )
   reviews: ConsentReviewEntity[];
 }

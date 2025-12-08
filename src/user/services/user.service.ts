@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { MentorRequestService } from './mentor-request.service';
-import { UserEntity } from '../entities/user.entity';
-import { Provider } from '../types/provider.type';
-import { UserRole } from '../types/user-role.type';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { Provider } from 'src/user/types/provider.type';
+import { UserRole } from 'src/user/types/user-role.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
@@ -16,12 +16,14 @@ export class UserService {
     private mentorRequestService: MentorRequestService,
   ) {}
 
-  async findAll(): Promise<UserEntity[]> {
-    return this.userRepository.find({ relations: ['mentor'] });
+  async findAll(options?: FindManyOptions<UserEntity>): Promise<UserEntity[]> {
+    return this.userRepository.find(options);
   }
 
-  async findOne(id: number): Promise<UserEntity | null> {
-    const user = await this.userRepository.findOne({ where: { userId: id }, relations: ['mentor'] });
+  async findOne(
+    option: FindOneOptions<UserEntity>,
+  ): Promise<UserEntity | null> {
+    const user = await this.userRepository.findOne(option);
 
     return user;
   }
@@ -35,32 +37,6 @@ export class UserService {
     });
 
     return user;
-  }
-
-  async findByUsername(username: string): Promise<UserEntity | null> {
-    const user = await this.userRepository.findOne({
-      where: { username },
-    });
-
-    return user;
-  }
-
-  async findMentor(user: UserEntity): Promise<UserEntity | null> {
-    const userWithMentor = await this.userRepository.findOne({
-      where: { userId: user.userId },
-      relations: ['mentor'],
-    });
-
-    return userWithMentor?.mentor || null;
-  }
-
-  async findMentees(user: UserEntity): Promise<UserEntity[]> {
-    const mentees = await this.userRepository.find({
-      where: { mentor: { userId: user.userId } },
-      relations: ['mentor'],
-    });
-
-    return mentees;
   }
 
   async create(
@@ -107,7 +83,10 @@ export class UserService {
   }
 
   async removeMentees(mentor: UserEntity): Promise<void> {
-    const mentees = await this.findMentees(mentor);
+    const mentees = await this.findAll({
+      where: { mentor: { userId: mentor.userId } },
+      relations: ['mentor'],
+    });
 
     for (const mentee of mentees) {
       mentee.mentor = null;
@@ -134,13 +113,18 @@ export class UserService {
   }
 
   async softRemove(user: UserEntity): Promise<void> {
-    const mentees = this.mentorRequestService.findByMentor(user);
+    const mentees = await this.findAll({
+      where: { mentor: { userId: user.userId } },
+      relations: ['mentor'],
+    });
 
-    Promise.all(mentees.map(async (mentee) => {
-      mentee.mentor = null;
-      await this.userRepository.save(mentee);
-    }));
-    
+    await Promise.all(
+      mentees.map(async (mentee) => {
+        mentee.mentor = null;
+        await this.userRepository.save(mentee);
+      }),
+    );
+
     await this.userRepository.softRemove(user);
   }
 }

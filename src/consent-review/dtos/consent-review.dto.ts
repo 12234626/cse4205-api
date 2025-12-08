@@ -16,9 +16,6 @@ export class ConsentReviewDto {
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
 
-  @ApiPropertyOptional({ description: '삭제일' })
-  deletedAt: Date | null;
-
   @ApiProperty({ description: '리뷰어', type: () => UserDto })
   reviewer: UserDto;
 
@@ -26,7 +23,6 @@ export class ConsentReviewDto {
     this.consentReviewId = consentReview.consentReviewId;
     this.comment = consentReview.comment;
     this.createdAt = consentReview.createdAt;
-    this.deletedAt = consentReview.deletedAt;
     this.reviewer = new UserDto(consentReview.reviewer);
   }
 }

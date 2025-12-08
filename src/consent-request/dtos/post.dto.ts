@@ -34,9 +34,6 @@ export class PostDto {
   @ApiProperty({ description: '수정일' })
   updatedAt: Date;
 
-  @ApiPropertyOptional({ description: '삭제일' })
-  deletedAt: Date | null;
-
   @ApiProperty({ description: '작성자', type: () => UserDto })
   author: UserDto;
 
@@ -53,7 +50,6 @@ export class PostDto {
     this.content = consentRequest.content;
     this.createdAt = consentRequest.createdAt;
     this.updatedAt = consentRequest.updatedAt;
-    this.deletedAt = consentRequest.deletedAt;
     this.author = new UserDto(consentRequest.author);
     this.images = consentRequest.images.map((image) => new PostImageDto(image));
     this.reviews = consentRequest.reviews.map(

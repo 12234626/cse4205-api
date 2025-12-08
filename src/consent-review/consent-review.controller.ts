@@ -26,17 +26,17 @@ export class ConsentReviewController {
     private readonly consentRequestService: ConsentRequestService,
   ) {}
 
-  @Post(':userQuestId/:requestType')
+  @Post(':requestType/:userQuestId')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: '승인 리뷰 작성' })
+  @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
   @ApiParam({
     name: 'requestType',
     enum: ConsentRequestType,
     description: '요청 타입',
   })
-  @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
   @ApiResponse({
     status: 201,
     description: '리뷰 작성 성공',

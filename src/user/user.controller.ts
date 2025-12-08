@@ -22,7 +22,6 @@ import { UserService } from './services/user.service';
 import { MentorRequestService } from './services/mentor-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserRoles } from 'src/auth/decorators/role.decorator';
-import { UserEntity } from './entities/user.entity';
 import { UserDto } from './dtos/user.dto';
 import { MentorRequestDto } from './dtos/mentor-request.dto';
 import { CreateMentorRequestDto } from './dtos/create-mentor-request.dto';
@@ -46,11 +45,11 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '프로필 조회 성공',
-    type: UserEntity,
+    type: UserDto,
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   getProfile(@Req() req: Request) {
-    return ResponseDto.ok<UserEntity>(req.user);
+    return ResponseDto.ok<UserDto>(new UserDto(req.user));
   }
 
   @Get('profile/username/:username')
@@ -69,7 +68,9 @@ export class UserController {
     description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
   })
   async getProfileByUsername(@Param('username') username: string) {
-    const user = await this.userService.findByUsername(username);
+    const user = await this.userService.findOne({
+      where: { username },
+    });
 
     if (!user) {
       throw ResponseException.userNotFound();
@@ -98,7 +99,11 @@ export class UserController {
     description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
   })
   async getMyMentor(@Req() req: Request) {
-    const mentor = await this.userService.findMentor(req.user);
+    const mentee = await this.userService.findOne({
+      where: { userId: req.user.userId },
+      relations: ['mentor'],
+    });
+    const mentor = mentee?.mentor;
 
     if (!mentor) {
       throw ResponseException.userNotFound();
@@ -123,7 +128,10 @@ export class UserController {
     description: '권한 없음 (FORBIDDEN)',
   })
   async getMyMentees(@Req() req: Request) {
-    const mentees = await this.userService.findMentees(req.user);
+    const mentees = await this.userService.findAll({
+      where: { mentor: { userId: req.user.userId } },
+      relations: ['mentor'],
+    });
 
     return ResponseDto.ok<UserDto[]>(
       mentees.map((mentee) => new UserDto(mentee)),
@@ -146,7 +154,10 @@ export class UserController {
     description: '권한 없음 (FORBIDDEN)',
   })
   async getMySentRequests(@Req() req: Request) {
-    const requests = await this.mentorRequestService.findByMentee(req.user);
+    const requests = await this.mentorRequestService.findAll({
+      where: { mentee: { userId: req.user.userId } },
+      relations: ['mentor', 'mentee'],
+    });
 
     return ResponseDto.ok<MentorRequestDto[]>(
       requests.map((request) => new MentorRequestDto(request)),
@@ -169,7 +180,10 @@ export class UserController {
     description: '권한 없음 (FORBIDDEN)',
   })
   async getMyReceivedRequests(@Req() req: Request) {
-    const requests = await this.mentorRequestService.findByMentor(req.user);
+    const requests = await this.mentorRequestService.findAll({
+      where: { mentor: { userId: req.user.userId } },
+      relations: ['mentor', 'mentee'],
+    });
 
     return ResponseDto.ok<MentorRequestDto[]>(
       requests.map((request) => new MentorRequestDto(request)),

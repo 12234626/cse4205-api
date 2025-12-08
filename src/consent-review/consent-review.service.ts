@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindManyOptions, FindOneOptions } from 'typeorm';
 
 import { ConsentRequestService } from 'src/consent-request/consent-request.service';
 import { ConsentReviewEntity } from './entities/consent-review.entity';
@@ -16,24 +16,36 @@ export class ConsentReviewService {
     private consentRequestService: ConsentRequestService,
   ) {}
 
+  async findAll(options?: FindManyOptions<ConsentReviewEntity>) {
+    return this.consentReviewRepository.find(options);
+  }
+
+  async findOne(
+    options: FindOneOptions<ConsentReviewEntity>,
+  ): Promise<ConsentReviewEntity | null> {
+    return this.consentReviewRepository.findOne(options);
+  }
+
   async create(
     reviewer: UserEntity,
     requestType: ConsentRequestType,
     userQuestId: number,
     comment?: string,
   ): Promise<ConsentReviewEntity> {
-    const consentRequest = await this.consentRequestService.findOne(
-      requestType,
-      userQuestId,
-    );
+    const consentRequest = await this.consentRequestService.findOne({
+      where: { requestType, userQuest: { userQuestId } },
+      relations: ['author', 'author.mentor', 'images', 'reviews'],
+    });
 
     if (!consentRequest) {
       throw ResponseException.consentRequestNotFound();
     }
 
+    const mentor = consentRequest.author.mentor;
+
     if (
       (requestType === ConsentRequestType.MENTOR) !==
-      (consentRequest.userQuest.user.userId === reviewer.userId)
+      (mentor?.userId === reviewer.userId)
     ) {
       throw ResponseException.forbidden();
     }
@@ -44,6 +56,11 @@ export class ConsentReviewService {
       comment,
     });
 
-    return this.consentReviewRepository.save(review);
+    await this.consentReviewRepository.save(review);
+
+    return (await this.findOne({
+      where: { consentReviewId: review.consentReviewId },
+      relations: ['reviewer'],
+    }))!;
   }
 }

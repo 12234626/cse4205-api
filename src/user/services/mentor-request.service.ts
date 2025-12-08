@@ -1,13 +1,13 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOneOptions, FindManyOptions } from 'typeorm';
 
 import { UserService } from './user.service';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { MentorRequestEntity } from 'src/user/entities/mentor-request.entity';
+import { UserRole } from 'src/user/types/user-role.type';
 import { RequestStatus } from 'src/user/types/request-status.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
-import { UserRole } from '../types/user-role.type';
 
 @Injectable()
 export class MentorRequestService {
@@ -18,25 +18,16 @@ export class MentorRequestService {
     private readonly userService: UserService,
   ) {}
 
-  async findOne(mentorRequestId: number): Promise<MentorRequestEntity | null> {
-    return this.mentorRequestRepository.findOne({
-      where: { mentorRequestId },
-      relations: ['mentor', 'mentee'],
-    });
+  async findAll(
+    options?: FindManyOptions<MentorRequestEntity>,
+  ): Promise<MentorRequestEntity[]> {
+    return this.mentorRequestRepository.find(options);
   }
 
-  async findByMentee(mentee: UserEntity): Promise<MentorRequestEntity[]> {
-    return this.mentorRequestRepository.find({
-      where: { mentee: { userId: mentee.userId } },
-      relations: ['mentor', 'mentee'],
-    });
-  }
-
-  async findByMentor(mentor: UserEntity): Promise<MentorRequestEntity[]> {
-    return this.mentorRequestRepository.find({
-      where: { mentor: { userId: mentor.userId } },
-      relations: ['mentor', 'mentee'],
-    });
+  async findOne(
+    options: FindOneOptions<MentorRequestEntity>,
+  ): Promise<MentorRequestEntity | null> {
+    return this.mentorRequestRepository.findOne(options);
   }
 
   async create(
@@ -47,11 +38,15 @@ export class MentorRequestService {
     let mentee: UserEntity | null;
 
     if (user.role === UserRole.MENTEE) {
-      mentor = await this.userService.findByUsername(otherUsername);
+      mentor = await this.userService.findOne({
+        where: { username: otherUsername },
+      });
       mentee = user;
     } else {
       mentor = user;
-      mentee = await this.userService.findByUsername(otherUsername);
+      mentee = await this.userService.findOne({
+        where: { username: otherUsername },
+      });
     }
 
     if (!mentor || !mentee) {
@@ -84,7 +79,10 @@ export class MentorRequestService {
     mentorRequestId: number,
     status: RequestStatus.ACCEPTED | RequestStatus.REJECTED,
   ): Promise<MentorRequestEntity> {
-    const mentorRequest = await this.findOne(mentorRequestId);
+    const mentorRequest = await this.findOne({
+      where: { mentorRequestId },
+      relations: ['mentor', 'mentee'],
+    });
 
     if (!mentorRequest) {
       throw ResponseException.mentorRequestNotFound();

@@ -44,7 +44,9 @@ async function canActivate(
     throw ResponseException.unauthorized();
   }
 
-  const user = await userService.findOne(request.payload.sub);
+  const user = await userService.findOne({
+    where: { userId: request.payload.sub },
+  });
 
   if (!user) {
     throw ResponseException.userNotFound();

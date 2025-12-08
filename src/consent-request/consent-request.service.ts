@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { UserQuestService } from 'src/user-quest/user-quest.service';
 import { ConsentRequestEntity } from './entities/consent-request.entity';
@@ -17,20 +17,15 @@ export class ConsentRequestService {
   ) {}
 
   async findAll(
-    requestType: ConsentRequestType,
+    options?: FindManyOptions<ConsentRequestEntity>,
   ): Promise<ConsentRequestEntity[]> {
-    return this.consentRequestRepository.find({
-      where: { requestType },
-    });
+    return this.consentRequestRepository.find(options);
   }
 
   async findOne(
-    requestType: ConsentRequestType,
-    userQuestId: number,
+    option: FindOneOptions<ConsentRequestEntity>,
   ): Promise<ConsentRequestEntity | null> {
-    return this.consentRequestRepository.findOne({
-      where: { userQuest: { userQuestId }, requestType },
-    });
+    return this.consentRequestRepository.findOne(option);
   }
 
   async create(
@@ -40,20 +35,24 @@ export class ConsentRequestService {
     title?: string,
     content?: string,
   ): Promise<ConsentRequestEntity> {
-    const userQuest = await this.userQuestService.findOneWithQuest(userQuestId);
+    const userQuest = await this.userQuestService.findOne({
+      where: { userQuestId },
+    });
 
     if (!userQuest) {
       throw ResponseException.userQuestNotFound();
     }
 
-    const existingConsentRequest = await this.findOne(requestType, userQuestId);
+    const consentRequest = await this.findOne({
+      where: { requestType, userQuest: { userQuestId } },
+    });
 
-    if (existingConsentRequest) {
+    if (consentRequest) {
       throw ResponseException.consentRequestAlreadyExists();
     }
 
-    const request = this.consentRequestRepository.create({
-      userQuest: { userQuestId },
+    const newConsentRequest = this.consentRequestRepository.create({
+      userQuest,
       requestType,
       author,
       title: requestType === ConsentRequestType.COMMUNITY ? title : undefined,
@@ -61,6 +60,11 @@ export class ConsentRequestService {
         requestType === ConsentRequestType.COMMUNITY ? content : undefined,
     });
 
-    return this.consentRequestRepository.save(request);
+    await this.consentRequestRepository.save(newConsentRequest);
+
+    return (await this.findOne({
+      where: { requestType, userQuest: { userQuestId } },
+      relations: ['author', 'images', 'reviews'],
+    }))!;
   }
 }

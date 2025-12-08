@@ -17,6 +17,10 @@ export class ResponseException extends HttpException {
     );
   }
 
+  static internalServerError(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.INTERNAL_SERVER_ERROR, message);
+  }
+
   static unauthorized(message?: string): ResponseException {
     return new ResponseException(ErrorCode.UNAUTHORIZED, message);
   }

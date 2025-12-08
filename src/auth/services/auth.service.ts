@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { UserService } from 'src/user/services/user.service';
 import { TokenService } from './token.service';
-import { JwtConfig } from 'src/config/jwt.config';
 import {
   GoogleResponseDto,
   NaverResponseDto,
@@ -18,15 +16,10 @@ import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
 export class AuthService {
-  private readonly jwtConfig: JwtConfig;
-
   constructor(
-    private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly userService: UserService,
-  ) {
-    this.jwtConfig = this.configService.getOrThrow<JwtConfig>('jwt');
-  }
+  ) {}
 
   private getAuthUrl(provider: Provider): string {
     switch (provider) {
@@ -113,10 +106,9 @@ export class AuthService {
 
   async login(provider: Provider, token: string): Promise<TokenPair> {
     const providerResponse = await this.fetchProviderId(provider, token);
-    const user = await this.userService.findByProviderId(
-      provider,
-      providerResponse.id,
-    );
+    const user = await this.userService.findOne({
+      where: { provider, providerId: providerResponse.id },
+    });
 
     if (!user) {
       throw ResponseException.userNotFound();
@@ -141,16 +133,15 @@ export class AuthService {
     mentorUsername?: string,
   ): Promise<TokenPair> {
     const providerResponse = await this.fetchProviderId(provider, token);
-    const existingUser = await this.userService.findByProviderId(
-      provider,
-      providerResponse.id,
-    );
+    const user = await this.userService.findOne({
+      where: { provider, providerId: providerResponse.id },
+    });
 
-    if (existingUser) {
+    if (user) {
       throw ResponseException.userAlreadyExists();
     }
 
-    const user = await this.userService.create(
+    const newUser = await this.userService.create(
       provider,
       providerResponse.id,
       username,
@@ -159,12 +150,12 @@ export class AuthService {
     );
 
     const payload: Payload = {
-      sub: user.userId,
-      role: user.role,
+      sub: newUser.userId,
+      role: newUser.role,
     };
     const tokenPair = this.tokenService.generateTokenPair(payload);
 
-    await this.tokenService.saveTokenPair(user, tokenPair);
+    await this.tokenService.saveTokenPair(newUser, tokenPair);
 
     return tokenPair;
   }

@@ -15,8 +15,8 @@ export default registerAs(
   'jwt',
   (): JwtConfig => ({
     secret: {
-      access: process.env.JWT_SECRET_ACCESS!,
-      refresh: process.env.JWT_SECRET_REFRESH!,
+      access: process.env.JWT_SECRET_ACCESS || '',
+      refresh: process.env.JWT_SECRET_REFRESH || '',
     },
     expiresIn: {
       access: 15 * 60,

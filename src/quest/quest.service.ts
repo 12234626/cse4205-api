@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Repository, FindOneOptions, FindManyOptions } from 'typeorm';
 
 import { QuestEntity } from './entities/quest.entity';
-import { CreateQuestDto, UpdateQuestDto } from './dtos/quest.dto';
+import { CreateQuestDto } from './dtos/create-quest.dto';
+import { UpdateQuestDto } from './dtos/update-quest.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
 @Injectable()
@@ -13,28 +14,16 @@ export class QuestService {
     private readonly questRepository: Repository<QuestEntity>,
   ) {}
 
-  async findAll(): Promise<QuestEntity[]> {
-    return this.questRepository.find();
+  async findAll(
+    options?: FindManyOptions<QuestEntity>,
+  ): Promise<QuestEntity[]> {
+    return this.questRepository.find(options);
   }
 
-  async findOne(id: number): Promise<QuestEntity | null> {
-    const quest = await this.questRepository.findOne({
-      where: { questId: id },
-    });
-
-    return quest;
-  }
-
-  async findByTitle(title: string): Promise<QuestEntity[]> {
-    return this.questRepository.find({
-      where: { title: Like(`%${title}%`) },
-    });
-  }
-
-  async findByCategory(category: string): Promise<QuestEntity[]> {
-    return this.questRepository.find({
-      where: { category },
-    });
+  async findOne(
+    options: FindOneOptions<QuestEntity>,
+  ): Promise<QuestEntity | null> {
+    return this.questRepository.findOne(options);
   }
 
   async create(createQuestDto: CreateQuestDto): Promise<QuestEntity> {
@@ -44,10 +33,12 @@ export class QuestService {
   }
 
   async update(
-    id: number,
+    questId: number,
     updateQuestDto: UpdateQuestDto,
   ): Promise<QuestEntity> {
-    const quest = await this.findOne(id);
+    const quest = await this.findOne({
+      where: { questId },
+    });
 
     if (!quest) {
       throw ResponseException.questNotFound();
@@ -58,8 +49,10 @@ export class QuestService {
     return this.questRepository.save(quest);
   }
 
-  async softRemove(id: number): Promise<void> {
-    const quest = await this.findOne(id);
+  async softRemove(questId: number): Promise<void> {
+    const quest = await this.findOne({
+      where: { questId },
+    });
 
     if (!quest) {
       throw ResponseException.questNotFound();

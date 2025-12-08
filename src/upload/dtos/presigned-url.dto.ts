@@ -1,5 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class PresignedUrlDto {
   @ApiProperty({ description: '파일 이름' })

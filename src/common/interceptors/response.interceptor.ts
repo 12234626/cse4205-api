@@ -9,6 +9,8 @@ import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { Request, Response } from 'express';
 
+import { ResponseException } from 'src/common/exceptions/response.exception';
+
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   readonly logger = new Logger(ResponseInterceptor.name);
@@ -48,16 +50,18 @@ export class ResponseInterceptor implements NestInterceptor {
         );
       }),
       catchError((error: { status?: number }) => {
+        const status = error?.status || 500;
+
         this.logger.error(
-          this.formatResponse(
-            method,
-            url,
-            error?.status || 500,
-            Date.now() - now,
-          ),
+          this.formatResponse(method, url, status, Date.now() - now),
         );
 
-        return throwError(() => error);
+        return throwError(() => {
+          if (error instanceof ResponseException) {
+            return error;
+          }
+          return ResponseException.internalServerError();
+        });
       }),
     );
   }

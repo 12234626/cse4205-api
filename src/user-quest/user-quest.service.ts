@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import {
+  Repository,
+  MoreThanOrEqual,
+  FindOneOptions,
+  FindManyOptions,
+} from 'typeorm';
 
 import { UserQuestEntity } from './entities/user-quest.entity';
-import { CreateUserQuestDto, UpdateUserQuestDto } from './dtos/user-quest.dto';
+import { CreateUserQuestDto } from './dtos/create-user-quest.dto';
+import { UpdateUserQuestDto } from './dtos/update-user-quest.dto';
 import { UserService } from 'src/user/services/user.service';
 import { QuestService } from 'src/quest/quest.service';
 import { ResponseException } from 'src/common/exceptions/response.exception';
@@ -20,37 +26,32 @@ export class UserQuestService {
     private readonly questService: QuestService,
   ) {}
 
-  async findAll(): Promise<UserQuestEntity[]> {
-    return this.userQuestRepository.find();
+  async findAll(
+    options?: FindManyOptions<UserQuestEntity>,
+  ): Promise<UserQuestEntity[]> {
+    return this.userQuestRepository.find(options);
   }
 
-  async findOne(id: number): Promise<UserQuestEntity | null> {
-    const userQuest = await this.userQuestRepository.findOne({
-      where: { userQuestId: id },
-    });
-
-    return userQuest;
-  }
-
-  async findOneWithQuest(id: number): Promise<UserQuestEntity | null> {
-    const userQuest = await this.userQuestRepository.findOne({
-      where: { userQuestId: id },
-      relations: ['quest'],
-    });
-
-    return userQuest;
+  async findOne(
+    options: FindOneOptions<UserQuestEntity>,
+  ): Promise<UserQuestEntity | null> {
+    return this.userQuestRepository.findOne(options);
   }
 
   async create(
     createUserQuestDto: CreateUserQuestDto,
   ): Promise<UserQuestEntity> {
-    const user = await this.userService.findOne(createUserQuestDto.userId);
+    const user = await this.userService.findOne({
+      where: { userId: createUserQuestDto.userId },
+    });
 
     if (!user) {
       throw ResponseException.userNotFound();
     }
 
-    const quest = await this.questService.findOne(createUserQuestDto.questId);
+    const quest = await this.questService.findOne({
+      where: { questId: createUserQuestDto.questId },
+    });
 
     if (!quest) {
       throw ResponseException.questNotFound();
@@ -66,10 +67,12 @@ export class UserQuestService {
   }
 
   async update(
-    id: number,
+    userQuestId: number,
     updateUserQuestDto: UpdateUserQuestDto,
   ): Promise<UserQuestEntity> {
-    const userQuest = await this.findOne(id);
+    const userQuest = await this.findOne({
+      where: { userQuestId },
+    });
 
     if (!userQuest) {
       throw ResponseException.userQuestNotFound();
@@ -80,8 +83,10 @@ export class UserQuestService {
     return this.userQuestRepository.save(userQuest);
   }
 
-  async softRemove(id: number): Promise<void> {
-    const userQuest = await this.findOne(id);
+  async softRemove(userQuestId: number): Promise<void> {
+    const userQuest = await this.findOne({
+      where: { userQuestId },
+    });
 
     if (!userQuest) {
       throw ResponseException.userQuestNotFound();
@@ -93,7 +98,9 @@ export class UserQuestService {
   async assignDailyQuests(userId: number): Promise<UserQuestEntity[]> {
     return await this.userQuestRepository.manager.transaction(
       async (transactionalEntityManager) => {
-        const user = await this.userService.findOne(userId);
+        const user = await this.userService.findOne({
+          where: { userId },
+        });
 
         if (!user) {
           throw ResponseException.userNotFound();

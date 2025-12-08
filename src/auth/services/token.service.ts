@@ -52,23 +52,24 @@ export class TokenService {
     return { accessToken, refreshToken };
   }
 
-  async verifyToken(token: string, type: TokenType): Promise<boolean> {
+  async verifyToken(tokenString: string, type: TokenType): Promise<boolean> {
     try {
       const secret =
         type === 'access'
           ? this.jwtConfig.secret.access
           : this.jwtConfig.secret.refresh;
 
-      this.jwtService.verify<Payload>(token, { secret });
+      this.jwtService.verify<Payload>(tokenString, { secret });
 
       const where =
-        type === 'access' ? { accessToken: token } : { refreshToken: token };
-
-      const tokenEntity = await this.tokenRepository.findOne({
+        type === 'access'
+          ? { accessToken: tokenString }
+          : { refreshToken: tokenString };
+      const token = await this.tokenRepository.findOne({
         where,
       });
 
-      return Boolean(tokenEntity);
+      return Boolean(token);
     } catch {
       return false;
     }
@@ -109,13 +110,13 @@ export class TokenService {
     return tokenPair;
   }
 
-  async revokeToken(type: TokenType, token: string): Promise<void> {
+  async revokeToken(type: TokenType, tokenString: string): Promise<void> {
     await this.tokenRepository.delete({
-      [type === 'access' ? 'accessToken' : 'refreshToken']: token,
+      [type === 'access' ? 'accessToken' : 'refreshToken']: tokenString,
     });
   }
 
   async revokeAllRefreshTokens(user: UserEntity): Promise<void> {
-    await this.tokenRepository.delete({ user });
+    await this.tokenRepository.delete({ user: { userId: user.userId } });
   }
 }
