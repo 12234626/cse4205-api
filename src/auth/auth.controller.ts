@@ -62,6 +62,10 @@ export class AuthController {
     status: 409,
     description: '이미 존재하는 사용자 (USER_ALREADY_EXISTS)',
   })
+  @ApiResponse({
+    status: 410,
+    description: '삭제된 계정 (USER_DELETED)',
+  })
   async register(@Body() registerDto: RegisterDto) {
     const tokenPair = await this.authService.register(
       registerDto.provider,
