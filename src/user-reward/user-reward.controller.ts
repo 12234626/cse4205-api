@@ -86,7 +86,7 @@ export class UserRewardController {
   async create(@Body() createUserRewardDto: CreateUserRewardDto) {
     const userReward = await this.userRewardService.create(createUserRewardDto);
 
-    return ResponseDto.created<UserRewardDto>(userReward);
+    return ResponseDto.created<UserRewardDto>(new UserRewardDto(userReward));
   }
 
   @Delete(':userRewardId')

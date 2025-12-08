@@ -124,7 +124,7 @@ export class UserQuestController {
       updateUserQuestDto,
     );
 
-    return ResponseDto.ok<UserQuestDto>(userQuest);
+    return ResponseDto.ok<UserQuestDto>(new UserQuestDto(userQuest));
   }
 
   @Delete(':userQuestId')
@@ -166,7 +166,9 @@ export class UserQuestController {
       req.user.userId,
     );
 
-    return ResponseDto.created<UserQuestDto[]>(userQuests);
+    return ResponseDto.created<UserQuestDto[]>(
+      userQuests.map((userQuest) => new UserQuestDto(userQuest)),
+    );
   }
 
   @Post('daily/assign-all')

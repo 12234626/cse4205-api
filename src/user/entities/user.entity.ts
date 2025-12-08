@@ -47,16 +47,10 @@ export class UserEntity {
   @IsString()
   username: string;
 
-  @Column({ type: 'int', nullable: true })
-  @IsInt()
-  @Min(0)
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  @IsUrl()
   @IsOptional()
-  age: number | null;
-
-  @Column({ type: 'int', default: 1 })
-  @IsInt()
-  @Min(1)
-  level: number;
+  avatarUrl: string | null;
 
   @Column({ type: 'int', default: 0 })
   @IsInt()
@@ -67,11 +61,6 @@ export class UserEntity {
   @IsInt()
   @Min(0)
   streak: number;
-
-  @Column({ type: 'varchar', length: 500, nullable: true })
-  @IsUrl()
-  @IsOptional()
-  avatarUrl: string | null;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
