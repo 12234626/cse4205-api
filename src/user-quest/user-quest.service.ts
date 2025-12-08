@@ -131,7 +131,7 @@ export class UserQuestService {
               user: { userId },
               createdAt: MoreThanOrEqual(today6AMKST),
             },
-            relations: ['quest'],
+            relations: ['quest', 'user'],
           },
         );
 
