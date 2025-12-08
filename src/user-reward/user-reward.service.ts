@@ -53,7 +53,12 @@ export class UserRewardService {
       reward,
     });
 
-    return this.userRewardRepository.save(userReward);
+    await this.userRewardRepository.save(userReward);
+
+    return (await this.findOne({
+      where: { userRewardId: userReward.userRewardId },
+      relations: ['user', 'reward'],
+    }))!;
   }
 
   async softRemove(userRewardId: number): Promise<void> {

@@ -98,7 +98,7 @@ export class UserController {
     status: 404,
     description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
   })
-  async getMyMentor(@Req() req: Request) {
+  async getMentor(@Req() req: Request) {
     const mentee = await this.userService.findOne({
       where: { userId: req.user.userId },
       relations: ['mentor'],
@@ -127,7 +127,7 @@ export class UserController {
     status: 403,
     description: '권한 없음 (FORBIDDEN)',
   })
-  async getMyMentees(@Req() req: Request) {
+  async getMentees(@Req() req: Request) {
     const mentees = await this.userService.findAll({
       where: { mentor: { userId: req.user.userId } },
       relations: ['mentor'],
@@ -153,7 +153,7 @@ export class UserController {
     status: 403,
     description: '권한 없음 (FORBIDDEN)',
   })
-  async getMySentRequests(@Req() req: Request) {
+  async getSentRequests(@Req() req: Request) {
     const requests = await this.mentorRequestService.findAll({
       where: { mentee: { userId: req.user.userId } },
       relations: ['mentor', 'mentee'],
@@ -179,7 +179,7 @@ export class UserController {
     status: 403,
     description: '권한 없음 (FORBIDDEN)',
   })
-  async getMyReceivedRequests(@Req() req: Request) {
+  async getReceivedRequests(@Req() req: Request) {
     const requests = await this.mentorRequestService.findAll({
       where: { mentor: { userId: req.user.userId } },
       relations: ['mentor', 'mentee'],
@@ -329,7 +329,7 @@ export class UserController {
     status: 404,
     description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
   })
-  async removeMyMentor(@Req() req: Request) {
+  async removeMentor(@Req() req: Request) {
     await this.userService.removeMentor(req.user);
 
     return ResponseDto.noContent();
@@ -346,7 +346,7 @@ export class UserController {
     status: 403,
     description: '권한 없음 (FORBIDDEN)',
   })
-  async removeMyMentees(@Req() req: Request) {
+  async removeMentees(@Req() req: Request) {
     await this.userService.removeMentees(req.user);
 
     return ResponseDto.noContent();

@@ -41,6 +41,10 @@ export class ResponseException extends HttpException {
     return new ResponseException(ErrorCode.USER_ALREADY_EXISTS, message);
   }
 
+  static userDeleted(message?: string): ResponseException {
+    return new ResponseException(ErrorCode.USER_DELETED, message);
+  }
+
   static invalidUserRole(message?: string): ResponseException {
     return new ResponseException(ErrorCode.INVALID_USER_ROLE, message);
   }

@@ -24,6 +24,29 @@ export class ResponseInterceptor implements NestInterceptor {
     return `${method} ${url} ${status} (${duration}ms)`;
   }
 
+  private cleanseData(data: unknown): unknown {
+    if (data === null) {
+      return undefined;
+    }
+    if (Array.isArray(data)) {
+      return data.map((item) => this.cleanseData(item));
+    }
+
+    if (typeof data === 'object') {
+      const converted: object = {};
+
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          converted[key] = this.cleanseData(data[key]);
+        }
+      }
+
+      return converted;
+    }
+
+    return data;
+  }
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const http = context.switchToHttp();
     const request = http.getRequest<Request>();
@@ -37,7 +60,7 @@ export class ResponseInterceptor implements NestInterceptor {
           response.status(data.statusCode);
         }
 
-        return data;
+        return this.cleanseData(data);
       }),
       tap(() => {
         this.logger.log(

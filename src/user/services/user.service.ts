@@ -74,12 +74,17 @@ export class UserService {
   }
 
   async removeMentor(user: UserEntity): Promise<void> {
-    if (!user.mentor) {
+    const userWithMentor = await this.userRepository.findOne({
+      where: { userId: user.userId },
+      relations: ['mentor'],
+    });
+
+    if (!userWithMentor || !userWithMentor.mentor) {
       throw ResponseException.userNotFound();
     }
 
-    user.mentor = null;
-    await this.userRepository.save(user);
+    userWithMentor.mentor = null;
+    await this.userRepository.save(userWithMentor);
   }
 
   async removeMentees(mentor: UserEntity): Promise<void> {

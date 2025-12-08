@@ -16,6 +16,7 @@ import { ResponseException } from 'src/common/exceptions/response.exception';
 import { QuestType } from 'src/quest/types/quest.type';
 import { QuestStatus } from './types/quest-status.type';
 import { QuestEntity } from 'src/quest/entities/quest.entity';
+import { UserDto } from 'src/user/dtos/user.dto';
 
 @Injectable()
 export class UserQuestService {
@@ -63,7 +64,12 @@ export class UserQuestService {
       status: createUserQuestDto.status,
     });
 
-    return this.userQuestRepository.save(userQuest);
+    await this.userQuestRepository.save(userQuest);
+
+    return (await this.findOne({
+      where: { userQuestId: userQuest.userQuestId },
+      relations: ['user', 'quest'],
+    }))!;
   }
 
   async update(
@@ -79,8 +85,12 @@ export class UserQuestService {
     }
 
     Object.assign(userQuest, updateUserQuestDto);
+    await this.userQuestRepository.save(userQuest);
 
-    return this.userQuestRepository.save(userQuest);
+    return (await this.findOne({
+      where: { userQuestId },
+      relations: ['user', 'quest'],
+    }))!;
   }
 
   async softRemove(userQuestId: number): Promise<void> {
@@ -139,7 +149,7 @@ export class UserQuestService {
         const randomQuestPool = allQuests.filter(
           (quest) =>
             quest.questType === QuestType.DAILY &&
-            quest.levelRequired <= user.level &&
+            quest.levelRequired <= new UserDto(user).level &&
             !quest.title.includes('출석'),
         );
 

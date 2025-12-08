@@ -135,9 +135,13 @@ export class AuthService {
     const providerResponse = await this.fetchProviderId(provider, token);
     const user = await this.userService.findOne({
       where: { provider, providerId: providerResponse.id },
+      withDeleted: true,
     });
 
     if (user) {
+      if (user.deletedAt) {
+        throw ResponseException.userDeleted();
+      }
       throw ResponseException.userAlreadyExists();
     }
 
