@@ -143,29 +143,27 @@ export class UserQuestService {
 
         const fixedQuests = allQuests.filter(
           (quest) =>
-            quest.questType === QuestType.DAILY &&
-            (quest.title.includes('출석') || quest.title.includes('검증')),
+            quest.questType === QuestType.DAILY && quest.title.includes('출석'),
         );
 
         const randomQuestPool = allQuests.filter(
           (quest) =>
             quest.questType === QuestType.DAILY &&
             quest.levelRequired <= new UserDto(user).level &&
-            !quest.title.includes('출석') &&
-            !quest.title.includes('검증'),
+            !quest.title.includes('출석'),
         );
 
-        if (fixedQuests.length < 2) {
+        if (fixedQuests.length < 1) {
           throw ResponseException.questNotFound();
         }
 
-        if (randomQuestPool.length < 2) {
+        if (randomQuestPool.length < 3) {
           throw ResponseException.questNotFound();
         }
 
-        const randomQuests = this.getRandomQuests(randomQuestPool, 2);
+        const randomQuests = this.getRandomQuests(randomQuestPool, 3);
 
-        const fixedQuestsToAssign = fixedQuests.slice(0, 2);
+        const fixedQuestsToAssign = fixedQuests.slice(0, 1);
         const allQuestsToAssign = [...fixedQuestsToAssign, ...randomQuests];
 
         const assignedQuests = allQuestsToAssign.map((quest) =>
