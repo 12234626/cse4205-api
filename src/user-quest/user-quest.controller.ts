@@ -201,4 +201,33 @@ export class UserQuestController {
 
     return ResponseDto.ok<AssignAllResponseDto>(response);
   }
+
+  @Post(':userQuestId/complete')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiOperation({ summary: '퀘스트 완료 (출석 버튼 등)' })
+  @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
+  @ApiResponse({ status: 204, description: '퀘스트 완료 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 퀘스트를 찾을 수 없음 (USER_QUEST_NOT_FOUND)',
+  })
+  async completeQuest(
+    @Req() req: Request,
+    @Param('userQuestId') userQuestId: number,
+  ) {
+    const userQuest = await this.userQuestService.findOne({
+      where: { userQuestId, user: { userId: req.user.userId } },
+      relations: ['user', 'quest'],
+    });
+
+    if (!userQuest) {
+      throw ResponseException.userQuestNotFound();
+    }
+
+    await this.userQuestService.complete(userQuest);
+
+    return ResponseDto.noContent();
+  }
 }
