@@ -60,6 +60,11 @@ export class UserEntity {
   @Column({ type: 'int', default: 0 })
   @IsInt()
   @Min(0)
+  todayQuest: number;
+
+  @Column({ type: 'int', default: 0 })
+  @IsInt()
+  @Min(0)
   streak: number;
 
   @CreateDateColumn({ type: 'timestamp' })

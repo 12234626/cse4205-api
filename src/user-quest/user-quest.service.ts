@@ -93,6 +93,31 @@ export class UserQuestService {
     }))!;
   }
 
+  async complete(userQuest: UserQuestEntity): Promise<UserQuestEntity> {
+    if (userQuest.status !== QuestStatus.CONSENTED) {
+      const user = userQuest.user;
+      const quest = userQuest.quest;
+
+      user.exp += quest.expReward;
+      user.todayQuest += 1;
+      user.streak += user.todayQuest === 2 ? 1 : 0;
+      await this.userService.update(user, {
+        exp: user.exp,
+        todayQuest: user.todayQuest,
+        streak: user.streak,
+      });
+      await this.update(userQuest.userQuestId, {
+        status: QuestStatus.CONSENTED,
+        completedAt: new Date(),
+      });
+
+      return (await this.findOne({
+        where: { userQuestId: userQuest.userQuestId },
+      }))!;
+    }
+    return userQuest;
+  }
+
   async softRemove(userQuestId: number): Promise<void> {
     const userQuest = await this.findOne({
       where: { userQuestId },
@@ -176,6 +201,12 @@ export class UserQuestService {
 
         const savedQuests =
           await transactionalEntityManager.save(assignedQuests);
+
+        if (user.todayQuest < 2) {
+          user.streak = 0;
+        }
+        user.todayQuest = 0;
+        await transactionalEntityManager.save(user);
 
         return savedQuests;
       },
