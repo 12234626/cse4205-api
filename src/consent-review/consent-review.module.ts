@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ConsentReviewService } from './consent-review.service';
 import { ConsentReviewController } from './consent-review.controller';
-import { UserModule } from 'src/user/user.module';
 import { UserQuestModule } from 'src/user-quest/user-quest.module';
 import { ConsentRequestModule } from 'src/consent-request/consent-request.module';
 import { ConsentReviewEntity } from './entities/consent-review.entity';
@@ -11,7 +10,6 @@ import { ConsentReviewEntity } from './entities/consent-review.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ConsentReviewEntity]),
-    UserModule,
     UserQuestModule,
     ConsentRequestModule,
   ],

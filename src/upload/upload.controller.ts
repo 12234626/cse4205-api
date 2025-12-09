@@ -22,9 +22,11 @@ export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('presigned-url')
-  @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'S3 업로드를 위한 Presigned URL 생성' })
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiOperation({
+    summary: 'S3 업로드를 위한 Presigned URL 생성',
+  })
   @ApiResponse({
     status: 200,
     description: 'Presigned URL 생성 성공',
@@ -46,13 +48,17 @@ export class UploadController {
   @ApiBearerAuth()
   @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({
-    summary: '업로드된 파일 URL을 저장 (아바타 또는 퀘스트 검증 이미지)',
+    summary: '업로드된 파일 URL을 데이터베이스에 저장',
   })
   @ApiResponse({
     status: 204,
     description: '파일 URL 저장 성공',
   })
-  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
+  @ApiResponse({
+    status: 400,
+    description:
+      '검증 오류 (VALIDATION_ERROR) - CONSENT_IMAGE 타입인데 consentRequestId가 없는 경우',
+  })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
     status: 404,

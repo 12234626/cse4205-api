@@ -3,11 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions, FindOneOptions } from 'typeorm';
 
 import { ConsentRequestService } from 'src/consent-request/consent-request.service';
-import { UserService } from 'src/user/services/user.service';
 import { UserQuestService } from 'src/user-quest/user-quest.service';
 import { ConsentReviewEntity } from './entities/consent-review.entity';
 import { UserEntity } from 'src/user/entities/user.entity';
-import { QuestStatus } from 'src/user-quest/types/quest-status.type';
 import { ConsentRequestType } from 'src/consent-request/types/consent-request-type.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 
@@ -17,7 +15,6 @@ export class ConsentReviewService {
     @InjectRepository(ConsentReviewEntity)
     private consentReviewRepository: Repository<ConsentReviewEntity>,
     private consentRequestService: ConsentRequestService,
-    private userService: UserService,
     private userQuestService: UserQuestService,
   ) {}
 
@@ -83,19 +80,7 @@ export class ConsentReviewService {
     const isCommunityApproved = communityConsentReviews.length >= 5;
 
     if (isMentorApproved || isCommunityApproved) {
-      const userQuest = consentRequest.userQuest;
-
-      if (userQuest.status !== QuestStatus.CONSENTED) {
-        const user = userQuest.user;
-        const quest = userQuest.quest;
-
-        user.exp += quest.expReward;
-        await this.userService.update(user, { exp: user.exp });
-        await this.userQuestService.update(userQuest.userQuestId, {
-          status: QuestStatus.CONSENTED,
-          completedAt: new Date(),
-        });
-      }
+      await this.userQuestService.complete(consentRequest.userQuest);
     }
 
     return (await this.findOne({

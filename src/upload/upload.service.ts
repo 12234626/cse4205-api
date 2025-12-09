@@ -7,7 +7,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { AwsConfig } from 'src/config/aws.config';
 import { PresignedUrlResponseDto } from 'src/upload/dtos/presigned-url.dto';
-import { SaveFileUrlDto, FileUploadType } from './dtos/save-file-url.dto';
+import { SaveFileUrlDto } from './dtos/save-file-url.dto';
+import { FileUploadType } from './types/file-upload.type';
 import { UserService } from 'src/user/services/user.service';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 import { ConsentRequestImageEntity } from 'src/consent-request/entities/consent-request-image.entity';

@@ -1,28 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUrl, IsEnum } from 'class-validator';
+import { IsInt, IsUrl, IsEnum, IsOptional } from 'class-validator';
 
-export enum FileUploadType {
-  AVATAR = 'AVATAR',
-  CONSENT_IMAGE = 'CONSENT_IMAGE',
-}
+import { FileUploadType } from '../types/file-upload.type';
 
 export class SaveFileUrlDto {
-  @ApiProperty({ description: '업로드된 파일 URL' })
+  @ApiProperty({
+    description: '업로드된 파일 URL',
+  })
   @IsUrl()
   fileUrl: string;
 
   @ApiProperty({
     enum: FileUploadType,
-    description:
-      '파일 타입 (avatar: 아바타, consent_image: 퀘스트 검증 이미지)',
+    description: '파일 타입',
+    enumName: 'FileUploadType',
   })
   @IsEnum(FileUploadType)
   fileType: FileUploadType;
 
   @ApiProperty({
-    description: '퀘스트 검증 이미지인 경우 consent request ID (필수)',
+    description:
+      '퀘스트 검증 이미지인 경우 consent request ID (CONSENT_IMAGE 타입일 때 필수)',
     required: false,
   })
-  @IsString()
+  @IsInt()
+  @IsOptional()
   consentRequestId?: number;
 }

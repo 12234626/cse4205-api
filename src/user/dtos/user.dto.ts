@@ -33,6 +33,10 @@ export class UserDto {
   @IsInt()
   exp: number;
 
+  @ApiProperty({ description: '오늘의 퀘스트 완료 개수' })
+  @IsInt()
+  todayQuest: number;
+
   @ApiProperty({ description: '연속 출석일수' })
   @IsInt()
   streak: number;
@@ -57,7 +61,9 @@ export class UserDto {
     this.userId = user.userId;
     this.role = user.role;
     this.username = user.username;
+    this.avatarUrl = user.avatarUrl;
     this.exp = user.exp;
+    this.todayQuest = user.todayQuest;
     this.streak = user.streak;
     this.level = this.getLevel(user.exp);
     this.currentLevelExp = user.exp - this.getAccumulatedExp(this.level);
