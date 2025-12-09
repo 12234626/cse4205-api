@@ -207,15 +207,7 @@ export class UserQuestController {
   @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({ summary: '퀘스트 완료 (출석 버튼 등)' })
   @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
-  @ApiResponse({
-    status: 200,
-    description: '퀘스트 완료 성공',
-    type: UserQuestDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '이미 완료된 퀘스트 (VALIDATION_ERROR)',
-  })
+  @ApiResponse({ status: 204, description: '퀘스트 완료 성공' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({
     status: 404,
@@ -234,8 +226,8 @@ export class UserQuestController {
       throw ResponseException.userQuestNotFound();
     }
 
-    const completedQuest = await this.userQuestService.complete(userQuest);
+    await this.userQuestService.complete(userQuest);
 
-    return ResponseDto.ok<UserQuestDto>(new UserQuestDto(completedQuest));
+    return ResponseDto.noContent();
   }
 }
