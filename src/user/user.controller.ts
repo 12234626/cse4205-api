@@ -79,6 +79,33 @@ export class UserController {
     return ResponseDto.ok<UserDto>(new UserDto(user));
   }
 
+  @Get('profile/id/:userId')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'ID로 사용자 프로필 조회' })
+  @ApiParam({ name: 'userId', description: '사용자 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '프로필 조회 성공',
+    type: UserDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 404,
+    description: '사용자를 찾을 수 없음 (USER_NOT_FOUND)',
+  })
+  async getProfileById(@Param('userId') userId: number) {
+    const user = await this.userService.findOne({
+      where: { userId },
+    });
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    return ResponseDto.ok<UserDto>(new UserDto(user));
+  }
+
   @Get('mentor')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTEE)
