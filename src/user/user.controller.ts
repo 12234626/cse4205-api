@@ -106,6 +106,35 @@ export class UserController {
     return ResponseDto.ok<UserDto>(new UserDto(user));
   }
 
+  @Get('mentor/:userId')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '특정 유저의 멘토 조회' })
+  @ApiParam({ name: 'userId', description: '조회할 멘티의 사용자 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '멘토 조회 성공',
+    type: UserDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 404,
+    description: '멘토를 찾을 수 없음 (USER_NOT_FOUND)',
+  })
+  async getMentorByUserId(@Param('userId') userId: number) {
+    const mentee = await this.userService.findOne({
+      where: { userId },
+      relations: ['mentor'],
+    });
+    const mentor = mentee?.mentor;
+
+    if (!mentor) {
+      throw ResponseException.userNotFound();
+    }
+
+    return ResponseDto.ok<UserDto>(new UserDto(mentor));
+  }
+
   @Get('mentor')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTEE)
