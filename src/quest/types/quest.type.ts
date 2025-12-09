@@ -1,12 +1,12 @@
 export enum QuestType {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  EVENT = 'event',
-  NORMAL = 'normal',
+  DAILY = 'DAILY',
+  WEEKLY = 'WEEKLY',
+  EVENT = 'EVENT',
+  NORMAL = 'NORMAL',
 }
 
 export enum Difficulty {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard',
+  EASY = 'EASY',
+  MEDIUM = 'MEDIUM',
+  HARD = 'HARD',
 }

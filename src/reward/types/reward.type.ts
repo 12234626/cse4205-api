@@ -1,6 +1,6 @@
 export enum RewardType {
-  BADGE = 'badge',
-  TITLE = 'title',
-  ACHIEVEMENT = 'achievement',
-  SEASON = 'season',
+  BADGE = 'BADGE',
+  TITLE = 'TITLE',
+  ACHIEVEMENT = 'ACHIEVEMENT',
+  SEASON = 'SEASON',
 }

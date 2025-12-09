@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUrl, IsEnum } from 'class-validator';
 
 export enum FileUploadType {
-  AVATAR = 'avatar',
-  CONSENT_IMAGE = 'consent_image',
+  AVATAR = 'AVATAR',
+  CONSENT_IMAGE = 'CONSENT_IMAGE',
 }
 
 export class SaveFileUrlDto {
