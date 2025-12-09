@@ -77,7 +77,7 @@ export class ConsentReviewService {
       (consentReview) => consentReview.reviewer.userId !== mentor?.userId,
     );
     const isMentorApproved = mentorConsentReview.length > 0;
-    const isCommunityApproved = communityConsentReviews.length >= 5;
+    const isCommunityApproved = communityConsentReviews.length >= 3;
 
     if (isMentorApproved || isCommunityApproved) {
       await this.userQuestService.complete(consentRequest.userQuest);
