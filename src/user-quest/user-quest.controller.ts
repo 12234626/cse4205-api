@@ -28,6 +28,7 @@ import { AssignAllResponseDto } from './dtos/assign-all-response.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 import { UserService } from 'src/user/services/user.service';
+import { QuestType } from 'src/quest/types/quest.type';
 
 @ApiTags('사용자 퀘스트')
 @Controller('user-quest')
@@ -244,9 +245,15 @@ export class UserQuestController {
   async assignAllWeeklyQuests() {
     const users = await this.userService.findAll();
 
+    const allWeeklyQuests = await this.userQuestService['questService'].findAll(
+      {
+        where: { questType: QuestType.WEEKLY },
+      },
+    );
+
     const results = await Promise.allSettled(
       users.map((user) =>
-        this.userQuestService.assignWeeklyQuests(user.userId),
+        this.userQuestService.assignWeeklyQuests(user.userId, allWeeklyQuests),
       ),
     );
 

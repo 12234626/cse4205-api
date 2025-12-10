@@ -213,29 +213,44 @@ export class UserQuestService {
     );
   }
 
-  async assignWeeklyQuests(userId: number): Promise<UserQuestEntity[]> {
+  async assignWeeklyQuests(
+    userId: number,
+    weeklyQuests?: QuestEntity[],
+  ): Promise<UserQuestEntity[]> {
     return await this.userQuestRepository.manager.transaction(
       async (transactionalEntityManager) => {
-        const user = await this.userService.findOne({
-          where: { userId },
-        });
+        const user =
+          (await transactionalEntityManager
+            .findOne(UserQuestEntity, {
+              where: { user: { userId } },
+              relations: ['user'],
+            })
+            .then((uq) => uq?.user)) ||
+          (await this.userService.findOne({
+            where: { userId },
+          }));
 
         if (!user) {
           throw ResponseException.userNotFound();
         }
 
         const now = new Date();
-        const thisWeekMonday6AMKST = new Date(now);
-        thisWeekMonday6AMKST.setUTCHours(21, 0, 0, 0);
-
-        // 월요일 기준 (0=일요일, 1=월요일)
-        const dayOfWeek = now.getUTCDay();
-        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        thisWeekMonday6AMKST.setUTCDate(
-          thisWeekMonday6AMKST.getUTCDate() + daysToMonday,
+        const todayUTC = new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
         );
 
-        if (now.getUTCHours() < 21 && dayOfWeek === 1) {
+        const dayOfWeek = todayUTC.getUTCDay();
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+        const thisWeekMondayUTC = new Date(todayUTC);
+        thisWeekMondayUTC.setUTCDate(
+          thisWeekMondayUTC.getUTCDate() + daysToMonday,
+        );
+
+        thisWeekMondayUTC.setUTCHours(21, 0, 0, 0);
+
+        const thisWeekMonday6AMKST = new Date(thisWeekMondayUTC);
+        if (dayOfWeek === 1 && now.getUTCHours() < 21) {
           thisWeekMonday6AMKST.setUTCDate(
             thisWeekMonday6AMKST.getUTCDate() - 7,
           );
@@ -257,13 +272,13 @@ export class UserQuestService {
           return existingQuests;
         }
 
-        const allQuests = await this.questService.findAll();
-
-        const weeklyQuestPool = allQuests.filter(
-          (quest) =>
-            quest.questType === QuestType.WEEKLY &&
-            quest.levelRequired <= new UserDto(user).level,
-        );
+        const userLevel = new UserDto(user).level;
+        const weeklyQuestPool =
+          weeklyQuests ||
+          (await this.questService.findByTypeAndLevel(
+            QuestType.WEEKLY,
+            userLevel,
+          ));
 
         if (weeklyQuestPool.length < 3) {
           throw ResponseException.questNotFound();
