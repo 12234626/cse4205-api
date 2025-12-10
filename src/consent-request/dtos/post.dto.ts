@@ -43,6 +43,9 @@ export class PostDto {
   @ApiProperty({ description: '리뷰 목록', type: () => [ConsentReviewDto] })
   reviews: ConsentReviewDto[];
 
+  @ApiProperty({ description: '사용자 퀘스트 ID' })
+  userQuestId: number;
+
   constructor(consentRequest: ConsentRequestEntity) {
     this.consentRequestId = consentRequest.consentRequestId;
     this.requestType = consentRequest.requestType;
@@ -55,5 +58,6 @@ export class PostDto {
     this.reviews = consentRequest.reviews.map(
       (review) => new ConsentReviewDto(review),
     );
+    this.userQuestId = consentRequest.userQuest.userQuestId;
   }
 }
