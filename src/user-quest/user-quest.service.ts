@@ -213,6 +213,80 @@ export class UserQuestService {
     );
   }
 
+  async assignWeeklyQuests(userId: number): Promise<UserQuestEntity[]> {
+    return await this.userQuestRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const user = await this.userService.findOne({
+          where: { userId },
+        });
+
+        if (!user) {
+          throw ResponseException.userNotFound();
+        }
+
+        const now = new Date();
+        const thisWeekMonday6AMKST = new Date(now);
+        thisWeekMonday6AMKST.setUTCHours(21, 0, 0, 0);
+
+        // 월요일 기준 (0=일요일, 1=월요일)
+        const dayOfWeek = now.getUTCDay();
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        thisWeekMonday6AMKST.setUTCDate(
+          thisWeekMonday6AMKST.getUTCDate() + daysToMonday,
+        );
+
+        if (now.getUTCHours() < 21 && dayOfWeek === 1) {
+          thisWeekMonday6AMKST.setUTCDate(
+            thisWeekMonday6AMKST.getUTCDate() - 7,
+          );
+        }
+
+        const existingQuests = await transactionalEntityManager.find(
+          UserQuestEntity,
+          {
+            where: {
+              user: { userId },
+              createdAt: MoreThanOrEqual(thisWeekMonday6AMKST),
+              quest: { questType: QuestType.WEEKLY },
+            },
+            relations: ['quest', 'user'],
+          },
+        );
+
+        if (existingQuests.length > 0) {
+          return existingQuests;
+        }
+
+        const allQuests = await this.questService.findAll();
+
+        const weeklyQuestPool = allQuests.filter(
+          (quest) =>
+            quest.questType === QuestType.WEEKLY &&
+            quest.levelRequired <= new UserDto(user).level,
+        );
+
+        if (weeklyQuestPool.length < 3) {
+          throw ResponseException.questNotFound();
+        }
+
+        const randomQuests = this.getRandomQuests(weeklyQuestPool, 3);
+
+        const assignedQuests = randomQuests.map((quest) =>
+          transactionalEntityManager.create(UserQuestEntity, {
+            user,
+            quest,
+            status: QuestStatus.PENDING,
+          }),
+        );
+
+        const savedQuests =
+          await transactionalEntityManager.save(assignedQuests);
+
+        return savedQuests;
+      },
+    );
+  }
+
   private getRandomQuests(quests: QuestEntity[], count: number): QuestEntity[] {
     const shuffled = [...quests];
     for (let i = shuffled.length - 1; i > 0; i--) {
