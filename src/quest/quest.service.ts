@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOneOptions, FindManyOptions } from 'typeorm';
+import {
+  Repository,
+  FindOneOptions,
+  FindManyOptions,
+  LessThanOrEqual,
+  IsNull,
+} from 'typeorm';
 
 import { QuestEntity } from './entities/quest.entity';
 import { CreateQuestDto } from './dtos/create-quest.dto';
 import { UpdateQuestDto } from './dtos/update-quest.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
+import { QuestType } from './types/quest.type';
 
 @Injectable()
 export class QuestService {
@@ -47,6 +54,24 @@ export class QuestService {
     Object.assign(quest, updateQuestDto);
 
     return this.questRepository.save(quest);
+  }
+
+  async findByTypeAndLevel(
+    questType: QuestType,
+    maxLevel: number,
+  ): Promise<QuestEntity[]> {
+    return this.questRepository.find({
+      where: [
+        {
+          questType,
+          levelRequired: LessThanOrEqual(maxLevel),
+        },
+        {
+          questType,
+          levelRequired: IsNull(),
+        },
+      ],
+    });
   }
 
   async softRemove(questId: number): Promise<void> {
