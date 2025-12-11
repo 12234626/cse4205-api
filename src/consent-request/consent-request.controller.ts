@@ -49,7 +49,14 @@ export class ConsentRequestController {
         requestType: ConsentRequestType.MENTOR,
         author: { mentor: { userId: req.user.userId } },
       },
-      relations: ['author', 'images', 'reviews', 'author.mentor'],
+      relations: [
+        'author',
+        'images',
+        'reviews',
+        'reviews.reviewer',
+        'author.mentor',
+        'userQuest',
+      ],
     });
 
     return ResponseDto.ok<PostDto[]>(
@@ -70,7 +77,13 @@ export class ConsentRequestController {
   async findAll() {
     const consentRequests = await this.consentRequestService.findAll({
       where: { requestType: ConsentRequestType.COMMUNITY },
-      relations: ['author', 'images', 'reviews'],
+      relations: [
+        'author',
+        'images',
+        'reviews',
+        'reviews.reviewer',
+        'userQuest',
+      ],
     });
 
     return ResponseDto.ok<PostDto[]>(
@@ -104,7 +117,13 @@ export class ConsentRequestController {
   ) {
     const consentRequest = await this.consentRequestService.findOne({
       where: { requestType, userQuest: { userQuestId } },
-      relations: ['author', 'images', 'reviews'],
+      relations: [
+        'author',
+        'images',
+        'reviews',
+        'reviews.reviewer',
+        'userQuest',
+      ],
     });
 
     if (!consentRequest) {
