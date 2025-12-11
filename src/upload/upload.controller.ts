@@ -21,6 +21,10 @@ import {
   PresignedUrlDto,
   PresignedUrlResponseDto,
 } from './dtos/presigned-url.dto';
+import {
+  PresignedGetUrlRequestDto,
+  PresignedGetUrlResponseDto,
+} from './dtos/presigned-get-url.dto';
 import { SaveFileUrlDto } from './dtos/save-file-url.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 
@@ -82,20 +86,18 @@ export class UploadController {
   @UseGuards(JwtAccessAuthGuard)
   @ApiOperation({
     summary: 'S3 파일 조회를 위한 Presigned GET URL 생성',
+    description:
+      'DB에 저장된 file URL을 임시 접근 가능한 presigned GET URL로 변환합니다. 생성된 URL은 1시간 동안 유효합니다.',
   })
   @ApiResponse({
     status: 200,
     description: 'Presigned GET URL 생성 성공',
-    schema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string' },
-      },
-    },
+    type: PresignedGetUrlResponseDto,
   })
+  @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  async getPresignedGetUrl(@Query('fileUrl') fileUrl: string) {
-    const url = await this.uploadService.getPresignedGetUrl(fileUrl);
-    return ResponseDto.ok({ url });
+  async getPresignedGetUrl(@Query() dto: PresignedGetUrlRequestDto) {
+    const url = await this.uploadService.getPresignedGetUrl(dto.fileUrl);
+    return ResponseDto.ok<PresignedGetUrlResponseDto>({ url });
   }
 }
