@@ -202,9 +202,6 @@ export class UserQuestService {
         const savedQuests =
           await transactionalEntityManager.save(assignedQuests);
 
-        if (user.todayQuest < 2) {
-          user.streak = 0;
-        }
         user.todayQuest = 0;
         await transactionalEntityManager.save(user);
 
