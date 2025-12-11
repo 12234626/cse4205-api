@@ -28,6 +28,7 @@ import { AssignAllResponseDto } from './dtos/assign-all-response.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { ResponseException } from 'src/common/exceptions/response.exception';
 import { UserService } from 'src/user/services/user.service';
+import { QuestType } from 'src/quest/types/quest.type';
 
 @ApiTags('사용자 퀘스트')
 @Controller('user-quest')
@@ -200,5 +201,100 @@ export class UserQuestController {
     response.total = users.length;
 
     return ResponseDto.ok<AssignAllResponseDto>(response);
+  }
+
+  @Post('weekly/assign')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiOperation({ summary: '이번 주 주간 퀘스트 할당' })
+  @ApiResponse({
+    status: 201,
+    description: '주간 퀘스트 할당 성공',
+    type: [UserQuestDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패 (UNAUTHORIZED)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 또는 퀘스트를 찾을 수 없음 (NOT_FOUND)',
+  })
+  async assignWeeklyQuests(@Req() req: Request) {
+    const userQuests = await this.userQuestService.assignWeeklyQuests(
+      req.user.userId,
+    );
+
+    return ResponseDto.created<UserQuestDto[]>(
+      userQuests.map((userQuest) => new UserQuestDto(userQuest)),
+    );
+  }
+
+  @Post('weekly/assign-all')
+  @UseGuards(ApiKeyGuard)
+  @ApiOperation({ summary: '모든 사용자 주간 퀘스트 할당 (Lambda용)' })
+  @ApiResponse({
+    status: 200,
+    description: '주간 퀘스트 할당 완료',
+    type: AssignAllResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'API 키 인증 실패',
+  })
+  async assignAllWeeklyQuests() {
+    const users = await this.userService.findAll();
+
+    const allWeeklyQuests = await this.userQuestService['questService'].findAll(
+      {
+        where: { questType: QuestType.WEEKLY },
+      },
+    );
+
+    const results = await Promise.allSettled(
+      users.map((user) =>
+        this.userQuestService.assignWeeklyQuests(user.userId, allWeeklyQuests),
+      ),
+    );
+
+    const successful = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+
+    const response = new AssignAllResponseDto();
+    response.message = '주간 퀘스트 할당 완료';
+    response.successful = successful;
+    response.failed = failed;
+    response.total = users.length;
+
+    return ResponseDto.ok<AssignAllResponseDto>(response);
+  }
+
+  @Post(':userQuestId/complete')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiOperation({ summary: '퀘스트 완료 (출석 버튼 등)' })
+  @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
+  @ApiResponse({ status: 204, description: '퀘스트 완료 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 퀘스트를 찾을 수 없음 (USER_QUEST_NOT_FOUND)',
+  })
+  async completeQuest(
+    @Req() req: Request,
+    @Param('userQuestId') userQuestId: number,
+  ) {
+    const userQuest = await this.userQuestService.findOne({
+      where: { userQuestId, user: { userId: req.user.userId } },
+      relations: ['user', 'quest'],
+    });
+
+    if (!userQuest) {
+      throw ResponseException.userQuestNotFound();
+    }
+
+    await this.userQuestService.complete(userQuest);
+
+    return ResponseDto.noContent();
   }
 }
