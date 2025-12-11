@@ -96,7 +96,7 @@ export class UploadController {
   })
   @ApiResponse({ status: 400, description: '검증 오류 (VALIDATION_ERROR)' })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
-  async getPresignedGetUrl(@Query() dto: PresignedGetUrlRequestDto) {
+  async PresignedGetUrl(@Query() dto: PresignedGetUrlRequestDto) {
     const url = await this.uploadService.getPresignedGetUrl(dto.fileUrl);
     return ResponseDto.ok<PresignedGetUrlResponseDto>({ url });
   }
