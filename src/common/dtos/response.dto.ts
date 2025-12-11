@@ -24,7 +24,7 @@ export class ResponseDto<T> {
     return new ResponseDto<T>(HttpStatus.ACCEPTED, data, message);
   }
 
-  static noContent(): ResponseDto<undefined> {
+  static noContent(): ResponseDto<null> {
     return new ResponseDto<null>(HttpStatus.NO_CONTENT);
   }
 }

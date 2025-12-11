@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { AwsConfig } from 'src/config/aws.config';
@@ -78,19 +74,5 @@ export class UploadService {
 
       await this.consentRequestImageRepository.save(consentImage);
     }
-  }
-
-  async getPresignedGetUrl(fileUrl: string): Promise<string> {
-    const url = new URL(fileUrl);
-    const key = url.pathname.substring(1);
-
-    const command = new GetObjectCommand({
-      Bucket: this.awsConfig.s3BucketName,
-      Key: key,
-    });
-
-    return await getSignedUrl(this.s3Client, command, {
-      expiresIn: 3600,
-    });
   }
 }
