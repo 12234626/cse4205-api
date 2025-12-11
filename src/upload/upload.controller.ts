@@ -1,4 +1,12 @@
-import { Controller, UseGuards, Post, Body, Req } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Post,
+  Body,
+  Req,
+  Get,
+  Query,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -67,5 +75,27 @@ export class UploadController {
   async saveFileUrl(@Req() req: Request, @Body() dto: SaveFileUrlDto) {
     await this.uploadService.saveFileUrl(req.user.userId, dto);
     return ResponseDto.noContent();
+  }
+
+  @Get('presigned-get-url')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiOperation({
+    summary: 'S3 파일 조회를 위한 Presigned GET URL 생성',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Presigned GET URL 생성 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async getPresignedGetUrl(@Query('fileUrl') fileUrl: string) {
+    const url = await this.uploadService.getPresignedGetUrl(fileUrl);
+    return ResponseDto.ok({ url });
   }
 }
