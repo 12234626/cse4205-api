@@ -64,7 +64,7 @@ export class ConsentRequestService {
 
     return (await this.findOne({
       where: { requestType, userQuest: { userQuestId } },
-      relations: ['author', 'images', 'reviews'],
+      relations: ['author', 'images', 'reviews', 'userQuest'],
     }))!;
   }
 }
