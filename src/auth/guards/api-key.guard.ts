@@ -13,7 +13,7 @@ export class ApiKeyGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const authHeader = request.headers['authorization'];
+    const apiKey = request.headers['x-api-key'] as string | undefined;
 
     const validApiKey = this.configService.get<string>('INTERNAL_API_KEY');
 
@@ -21,17 +21,7 @@ export class ApiKeyGuard implements CanActivate {
       throw ResponseException.unauthorized();
     }
 
-    if (
-      !authHeader ||
-      typeof authHeader !== 'string' ||
-      !authHeader.startsWith('Bearer ')
-    ) {
-      throw ResponseException.unauthorized();
-    }
-
-    const token = authHeader.replace('Bearer ', '').trim();
-
-    if (token !== validApiKey) {
+    if (!apiKey || apiKey !== validApiKey) {
       throw ResponseException.unauthorized();
     }
 
