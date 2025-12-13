@@ -5,9 +5,10 @@ import {
   Post,
   Put,
   Delete,
+  Req,
   Body,
   Param,
-  Req,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -146,9 +147,8 @@ export class UserQuestController {
   }
 
   @Post('daily/assign')
-  @ApiBearerAuth()
-  @UseGuards(JwtAccessAuthGuard)
-  @ApiOperation({ summary: '오늘의 일일 퀘스트 할당' })
+  @UseGuards(ApiKeyGuard)
+  @ApiOperation({ summary: '오늘의 일일 퀘스트 할당 (Lambda용)' })
   @ApiResponse({
     status: 201,
     description: '일일 퀘스트 할당 성공',
@@ -162,10 +162,12 @@ export class UserQuestController {
     status: 404,
     description: '사용자 또는 퀘스트를 찾을 수 없음 (NOT_FOUND)',
   })
-  async assignDailyQuests(@Req() req: Request) {
-    const userQuests = await this.userQuestService.assignDailyQuests(
-      req.user.userId,
-    );
+  async assignDailyQuests(@Query('userId') userId: string) {
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      throw ResponseException.validationError('유효하지 않은 userId');
+    }
+    const userQuests = await this.userQuestService.assignDailyQuests(userIdNum);
 
     return ResponseDto.created<UserQuestDto[]>(
       userQuests.map((userQuest) => new UserQuestDto(userQuest)),
