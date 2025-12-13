@@ -4,6 +4,7 @@ import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { MentorRequestService } from './mentor-request.service';
 import { UserEntity } from 'src/user/entities/user.entity';
+import { UserQuestService } from 'src/user-quest/user-quest.service';
 import { Provider } from 'src/user/types/provider.type';
 import { UserRole } from 'src/user/types/user-role.type';
 import { ResponseException } from 'src/common/exceptions/response.exception';
@@ -14,6 +15,7 @@ export class UserService {
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
     private mentorRequestService: MentorRequestService,
+    private userQuestService: UserQuestService,
   ) {}
 
   async findAll(options?: FindManyOptions<UserEntity>): Promise<UserEntity[]> {
@@ -53,11 +55,13 @@ export class UserService {
       role,
     });
 
+    await this.userRepository.save(user);
     if (mentorUsername) {
       await this.mentorRequestService.create(user, mentorUsername);
     }
+    await this.userQuestService.assignDailyQuests(user.userId);
 
-    return this.userRepository.save(user);
+    return user;
   }
 
   async update(

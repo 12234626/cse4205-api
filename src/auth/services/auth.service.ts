@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 
 import { TokenService } from './token.service';
 import { UserService } from 'src/user/services/user.service';
-import { UserQuestService } from 'src/user-quest/user-quest.service';
 import {
   GoogleResponseDto,
   NaverResponseDto,
@@ -20,7 +19,6 @@ export class AuthService {
   constructor(
     private readonly tokenService: TokenService,
     private readonly userService: UserService,
-    private readonly userQuestService: UserQuestService,
   ) {}
 
   private getAuthUrl(provider: Provider): string {
@@ -154,10 +152,6 @@ export class AuthService {
       role,
       mentorUsername,
     );
-
-    try {
-      await this.userQuestService.assignDailyQuests(newUser.userId);
-    } catch {}
 
     const payload: Payload = {
       sub: newUser.userId,

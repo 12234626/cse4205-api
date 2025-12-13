@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Repository,
@@ -23,6 +23,8 @@ export class UserQuestService {
   constructor(
     @InjectRepository(UserQuestEntity)
     private readonly userQuestRepository: Repository<UserQuestEntity>,
+
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly questService: QuestService,
   ) {}

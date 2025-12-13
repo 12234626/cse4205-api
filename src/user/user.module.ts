@@ -6,10 +6,14 @@ import { MentorRequestService } from './services/mentor-request.service';
 import { UserController } from './user.controller';
 import { UserEntity } from './entities/user.entity';
 import { MentorRequestEntity } from './entities/mentor-request.entity';
+import { UserQuestModule } from 'src/user-quest/user-quest.module';
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, MentorRequestEntity])],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, MentorRequestEntity]),
+    UserQuestModule,
+  ],
   controllers: [UserController],
   providers: [UserService, MentorRequestService],
   exports: [UserService, MentorRequestService],
