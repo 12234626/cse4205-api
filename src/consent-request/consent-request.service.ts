@@ -37,10 +37,15 @@ export class ConsentRequestService {
   ): Promise<ConsentRequestEntity> {
     const userQuest = await this.userQuestService.findOne({
       where: { userQuestId },
+      relations: ['user'],
     });
 
     if (!userQuest) {
       throw ResponseException.userQuestNotFound();
+    }
+
+    if (author.userId !== userQuest.user.userId) {
+      throw ResponseException.forbidden();
     }
 
     const consentRequest = await this.findOne({

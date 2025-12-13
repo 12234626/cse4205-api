@@ -133,9 +133,88 @@ export class ConsentRequestController {
     return ResponseDto.ok<PostDto>(new PostDto(consentRequest));
   }
 
-  @Post(':requestType/:userQuestId')
+  @Post('mentor/:userQuestId')
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTEE)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '멘토 승인 요청 생성' })
+  @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
+  @ApiResponse({
+    status: 201,
+    description: '승인 요청 생성 성공',
+    type: PostDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 퀘스트를 찾을 수 없음 (USER_QUEST_NOT_FOUND)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: '이미 승인 요청이 존재함 (CONSENT_REQUEST_ALREADY_EXISTS)',
+  })
+  async createMentorRequest(
+    @Req() req: Request,
+    @Param('userQuestId') userQuestId: number,
+  ) {
+    const consentRequest = await this.consentRequestService.create(
+      req.user,
+      ConsentRequestType.MENTOR,
+      userQuestId,
+    );
+
+    if (!consentRequest) {
+      throw ResponseException.consentRequestNotFound();
+    }
+
+    return ResponseDto.created<PostDto>(new PostDto(consentRequest));
+  }
+
+  @Post('community/:userQuestId')
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '커뮤니티 승인 요청 생성',
+  })
+  @ApiParam({ name: 'userQuestId', description: '사용자 퀘스트 ID' })
+  @ApiResponse({
+    status: 201,
+    description: '승인 요청 생성 성공',
+    type: PostDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 퀘스트를 찾을 수 없음 (USER_QUEST_NOT_FOUND)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: '이미 승인 요청이 존재함 (CONSENT_REQUEST_ALREADY_EXISTS)',
+  })
+  async createCommunityRequest(
+    @Req() req: Request,
+    @Param('userQuestId') userQuestId: number,
+    @Body() body: CreateRequestDto,
+  ) {
+    const consentRequest = await this.consentRequestService.create(
+      req.user,
+      ConsentRequestType.COMMUNITY,
+      userQuestId,
+      body.title,
+      body.content,
+    );
+
+    if (!consentRequest) {
+      throw ResponseException.consentRequestNotFound();
+    }
+
+    return ResponseDto.created<PostDto>(new PostDto(consentRequest));
+  }
+
+  @Post(':requestType/:userQuestId')
+  @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '승인 요청 생성' })
   @ApiParam({
