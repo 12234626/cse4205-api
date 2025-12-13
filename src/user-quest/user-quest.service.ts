@@ -132,6 +132,34 @@ export class UserQuestService {
     await this.userQuestRepository.softRemove(userQuest);
   }
 
+  async findTodayQuests(userId: number): Promise<UserQuestEntity[]> {
+    const user = await this.userService.findOne({
+      where: { userId },
+    });
+
+    if (!user) {
+      throw ResponseException.userNotFound();
+    }
+
+    const now = new Date();
+    const today6AMKST = new Date(now);
+    today6AMKST.setUTCHours(21, 0, 0, 0);
+
+    if (now.getUTCHours() < 21) {
+      today6AMKST.setUTCDate(today6AMKST.getUTCDate() - 1);
+    }
+
+    const todayQuests = await this.userQuestRepository.find({
+      where: {
+        user: { userId },
+        createdAt: MoreThanOrEqual(today6AMKST),
+      },
+      relations: ['quest', 'user'],
+    });
+
+    return todayQuests;
+  }
+
   async assignDailyQuests(userId: number): Promise<UserQuestEntity[]> {
     return await this.userQuestRepository.manager.transaction(
       async (transactionalEntityManager) => {

@@ -146,6 +146,26 @@ export class UserQuestController {
     return ResponseDto.noContent();
   }
 
+  @Get('daily/today')
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessAuthGuard)
+  @ApiOperation({ summary: '오늘의 일일 퀘스트 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '오늘의 퀘스트 조회 성공',
+    type: [UserQuestDto],
+  })
+  @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
+  async findTodayQuests(@Req() req: Request) {
+    const userQuests = await this.userQuestService.findTodayQuests(
+      req.user.userId,
+    );
+
+    return ResponseDto.ok<UserQuestDto[]>(
+      userQuests.map((userQuest) => new UserQuestDto(userQuest)),
+    );
+  }
+
   @Post('daily/assign')
   @UseGuards(ApiKeyGuard)
   @ApiOperation({ summary: '오늘의 일일 퀘스트 할당 (Lambda용)' })
