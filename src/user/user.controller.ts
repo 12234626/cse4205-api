@@ -79,6 +79,36 @@ export class UserController {
     return ResponseDto.ok<UserDto>(new UserDto(user));
   }
 
+  @Get('check-username/:username')
+  @ApiOperation({ summary: '닉네임 중복 체크 (인증 불필요)' })
+  @ApiParam({ name: 'username', description: '확인할 닉네임' })
+  @ApiResponse({
+    status: 200,
+    description: '닉네임 사용 가능 여부 및 역할 정보',
+    schema: {
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: {
+          type: 'object',
+          properties: {
+            available: { type: 'boolean', example: true },
+            role: { type: 'string', example: 'MENTOR', nullable: true },
+          },
+        },
+      },
+    },
+  })
+  async checkUsername(@Param('username') username: string) {
+    const user = await this.userService.findOne({
+      where: { username },
+    });
+
+    return ResponseDto.ok({
+      available: !user,
+      role: user?.role || null,
+    });
+  }
+
   @Get('profile/id/:userId')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
