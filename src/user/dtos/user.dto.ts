@@ -53,9 +53,8 @@ export class UserDto {
   @IsInt()
   nextLevelExp: number;
 
-  @ApiProperty({ description: '생성일' })
-  @IsDate()
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
   constructor(user: UserEntity) {
     this.userId = user.userId;
@@ -68,7 +67,7 @@ export class UserDto {
     this.level = this.getLevel(user.exp);
     this.currentLevelExp = user.exp - this.getAccumulatedExp(this.level);
     this.nextLevelExp = this.getExpRequiredForLevel(this.level);
-    this.createdAt = user.createdAt;
+    this.createdAt = user.createdAt.getTime();
   }
 
   private getExpRequiredForLevel(level: number): number {

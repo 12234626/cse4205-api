@@ -26,9 +26,8 @@ export class RewardDto {
   @IsEnum(RewardType)
   rewardType: RewardType;
 
-  @ApiProperty({ description: '생성일' })
-  @IsDate()
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
   constructor(reward: RewardEntity) {
     this.rewardId = reward.rewardId;
@@ -36,6 +35,6 @@ export class RewardDto {
     this.description = reward.description;
     this.iconUrl = reward.iconUrl;
     this.rewardType = reward.rewardType;
-    this.createdAt = reward.createdAt;
+    this.createdAt = reward.createdAt.getTime();
   }
 }

@@ -20,20 +20,18 @@ export class MentorRequestDto {
   @IsEnum(RequestStatus)
   status: RequestStatus;
 
-  @ApiProperty({ description: '생성일' })
-  @IsDate()
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
-  @ApiProperty({ description: '수정일' })
-  @IsDate()
-  updatedAt: Date;
+  @ApiProperty({ description: '수정일 (유닉스 시간)' })
+  updatedAt: number;
 
   constructor(mentorRequest: MentorRequestEntity) {
     this.mentorRequestId = mentorRequest.mentorRequestId;
     this.mentee = new UserDto(mentorRequest.mentee);
     this.mentor = new UserDto(mentorRequest.mentor);
     this.status = mentorRequest.status;
-    this.createdAt = mentorRequest.createdAt;
-    this.updatedAt = mentorRequest.updatedAt;
+    this.createdAt = mentorRequest.createdAt.getTime();
+    this.updatedAt = mentorRequest.updatedAt.getTime();
   }
 }

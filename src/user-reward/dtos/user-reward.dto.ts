@@ -10,9 +10,8 @@ export class UserRewardDto {
   @IsInt()
   userRewardId: number;
 
-  @ApiProperty({ description: '생성일' })
-  @IsDate()
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
   @ApiPropertyOptional({ description: '사용자', type: () => UserDto })
   user: UserDto;
@@ -22,7 +21,7 @@ export class UserRewardDto {
 
   constructor(userReward: UserRewardEntity) {
     this.userRewardId = userReward.userRewardId;
-    this.createdAt = userReward.createdAt;
+    this.createdAt = userReward.createdAt.getTime();
     this.user = new UserDto(userReward.user);
     this.reward = new RewardDto(userReward.reward);
   }
