@@ -15,14 +15,12 @@ export class UserQuestDto {
   @IsEnum(QuestStatus)
   status: QuestStatus;
 
-  @ApiPropertyOptional({ description: '퀘스트 완료 시간' })
-  @IsDate()
+  @ApiPropertyOptional({ description: '퀘스트 완료 시간 (유닉스 시간)' })
   @IsOptional()
-  completedAt: Date | null;
+  completedAt: number | null;
 
-  @ApiProperty({ description: '생성일' })
-  @IsDate()
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
   @ApiPropertyOptional({ description: '사용자', type: () => UserDto })
   user: UserDto;
@@ -33,8 +31,10 @@ export class UserQuestDto {
   constructor(userQuest: UserQuestEntity) {
     this.userQuestId = userQuest.userQuestId;
     this.status = userQuest.status;
-    this.completedAt = userQuest.completedAt;
-    this.createdAt = userQuest.createdAt;
+    this.completedAt = userQuest.completedAt
+      ? userQuest.completedAt.getTime()
+      : null;
+    this.createdAt = userQuest.createdAt.getTime();
     this.user = new UserDto(userQuest.user);
     this.quest = new QuestDto(userQuest.quest);
   }

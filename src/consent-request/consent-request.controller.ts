@@ -15,6 +15,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { MoreThanOrEqual } from 'typeorm';
 
 import { ConsentRequestService } from './consent-request.service';
 import { JwtAccessAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -35,7 +36,7 @@ export class ConsentRequestController {
   @UseGuards(JwtAccessAuthGuard)
   @UserRoles(UserRole.MENTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '멘토 퀘스트 승인 요청 목록' })
+  @ApiOperation({ summary: '멘토 퀘스트 승인 요청 목록 (오늘)' })
   @ApiResponse({
     status: 200,
     description: '요청 목록 조회 성공',
@@ -44,10 +45,14 @@ export class ConsentRequestController {
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   @ApiResponse({ status: 403, description: '권한 없음 (FORBIDDEN)' })
   async findAllMentorRequests(@Req() req: Request) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const consentRequests = await this.consentRequestService.findAll({
       where: {
         requestType: ConsentRequestType.MENTOR,
         author: { mentor: { userId: req.user.userId } },
+        createdAt: MoreThanOrEqual(today),
       },
       relations: [
         'author',
@@ -67,7 +72,7 @@ export class ConsentRequestController {
   @Get('community')
   @UseGuards(JwtAccessAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '커뮤니티 퀘스트 승인 요청 목록' })
+  @ApiOperation({ summary: '커뮤니티 퀘스트 승인 요청 목록 (오늘)' })
   @ApiResponse({
     status: 200,
     description: '요청 목록 조회 성공',
@@ -75,8 +80,14 @@ export class ConsentRequestController {
   })
   @ApiResponse({ status: 401, description: '인증 실패 (UNAUTHORIZED)' })
   async findAll() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const consentRequests = await this.consentRequestService.findAll({
-      where: { requestType: ConsentRequestType.COMMUNITY },
+      where: {
+        requestType: ConsentRequestType.COMMUNITY,
+        createdAt: MoreThanOrEqual(today),
+      },
       relations: [
         'author',
         'images',

@@ -13,8 +13,8 @@ export class ConsentReviewDto {
   @IsOptional()
   comment: string | null;
 
-  @ApiProperty({ description: '생성일' })
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
   @ApiProperty({ description: '리뷰어', type: () => UserDto })
   reviewer: UserDto;
@@ -22,7 +22,7 @@ export class ConsentReviewDto {
   constructor(consentReview: ConsentReviewEntity) {
     this.consentReviewId = consentReview.consentReviewId;
     this.comment = consentReview.comment;
-    this.createdAt = consentReview.createdAt;
+    this.createdAt = consentReview.createdAt.getTime();
     this.reviewer = new UserDto(consentReview.reviewer);
   }
 }

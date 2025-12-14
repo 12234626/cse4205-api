@@ -28,11 +28,11 @@ export class PostDto {
   @IsOptional()
   content: string | null;
 
-  @ApiProperty({ description: '생성일' })
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
-  @ApiProperty({ description: '수정일' })
-  updatedAt: Date;
+  @ApiProperty({ description: '수정일 (유닉스 시간)' })
+  updatedAt: number;
 
   @ApiProperty({ description: '작성자', type: () => UserDto })
   author: UserDto;
@@ -51,8 +51,8 @@ export class PostDto {
     this.requestType = consentRequest.requestType;
     this.title = consentRequest.title;
     this.content = consentRequest.content;
-    this.createdAt = consentRequest.createdAt;
-    this.updatedAt = consentRequest.updatedAt;
+    this.createdAt = consentRequest.createdAt.getTime();
+    this.updatedAt = consentRequest.updatedAt.getTime();
     this.author = new UserDto(consentRequest.author);
     this.images = consentRequest.images.map((image) => new PostImageDto(image));
     this.reviews = consentRequest.reviews.map(

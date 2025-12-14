@@ -40,9 +40,8 @@ export class QuestDto {
   @IsEnum(Difficulty)
   difficulty: Difficulty;
 
-  @ApiProperty({ description: '생성일' })
-  @IsDate()
-  createdAt: Date;
+  @ApiProperty({ description: '생성일 (유닉스 시간)' })
+  createdAt: number;
 
   constructor(quest: QuestEntity) {
     this.questId = quest.questId;
@@ -53,6 +52,6 @@ export class QuestDto {
     this.expReward = quest.expReward;
     this.levelRequired = quest.levelRequired;
     this.difficulty = quest.difficulty;
-    this.createdAt = quest.createdAt;
+    this.createdAt = quest.createdAt.getTime();
   }
 }
