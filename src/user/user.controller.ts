@@ -25,6 +25,7 @@ import { UserRoles } from 'src/auth/decorators/role.decorator';
 import { UserDto } from './dtos/user.dto';
 import { MentorRequestDto } from './dtos/mentor-request.dto';
 import { CreateMentorRequestDto } from './dtos/create-mentor-request.dto';
+import { CheckUsernameDto } from './dtos/check-username.dto';
 import { ResponseDto } from 'src/common/dtos/response.dto';
 import { UserRole } from './types/user-role.type';
 import { RequestStatus } from './types/request-status.type';
@@ -85,28 +86,16 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '닉네임 사용 가능 여부 및 역할 정보',
-    schema: {
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            available: { type: 'boolean', example: true },
-            role: { type: 'string', example: 'MENTOR', nullable: true },
-          },
-        },
-      },
-    },
+    type: CheckUsernameDto,
   })
   async checkUsername(@Param('username') username: string) {
     const user = await this.userService.findOne({
       where: { username },
     });
 
-    return ResponseDto.ok({
-      available: !user,
-      role: user?.role || null,
-    });
+    return ResponseDto.ok<CheckUsernameDto>(
+      new CheckUsernameDto(!user, user?.role),
+    );
   }
 
   @Get('profile/id/:userId')
